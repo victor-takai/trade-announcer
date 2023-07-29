@@ -13,10 +13,15 @@ TA = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0")
 -- Defaults for AceDB
 local defaults = {
     profile = {
+        position = {
+            x = nil,
+            y = nil,
+        },
         minimap = {
             hide = false,
         },
         trade_text = "",
+        is_on = false,
     },
 }
 
@@ -39,7 +44,7 @@ function TA:OnDisable()
 end
 
 function TA:SlashCommand()
-    addon:ShowUI()
+    addon:ToggleUI()
 end
 
 ----------------------------------------------------------------------------------------
@@ -51,43 +56,40 @@ function addon:SetupAddon()
     self:CreateMainFrameLabel(mainFrame)
     local scrollFrame = self:CreateScrollFrame(mainFrame)
     editBox = self:CreateEditBox(scrollFrame)
-    local saveButton = self:CreateSaveButton(mainFrame)
+    local toggleButton = self:CreateToggleButton(mainFrame)
     self:CreateTestButton(mainFrame, editBox)
-    self:CreateProfessionButtons(mainFrame, saveButton, editBox)
+    self:CreateProfessionButtons(mainFrame, toggleButton, editBox)
 end
 
 -- Creates the minimap button
 function addon:CreateMinimapButton()
-    local ldb = LibStub("LibDataBroker-1.1"):NewDataObject("TradeAnnouncer", {
+    local ldb = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
         type = "data source",
-        text = "TradeAnnouncer", -- Tooltip
-        icon = "Interface\\Icons\\INV_Misc_QuestionMark", -- Icon path
+        text = addonName,
+        icon = "Interface\\Icons\\INV_Misc_QuestionMark",
         OnClick = function(_, button)
             if button == "LeftButton" then
-                self:ShowUI()
+                self:ToggleUI()
             end
         end,
         OnTooltipShow = function(tooltip)
-            tooltip:AddLine("TradeAnnouncer")
+            tooltip:AddLine(addonName)
             tooltip:AddLine("Left-click to open input box.", 1, 1, 1, 1)
         end,
     })
 
-    LibStub("LibDBIcon-1.0"):Register("TradeAnnouncer", ldb, TA.db.profile.minimap)
+    LibStub("LibDBIcon-1.0"):Register(addonName, ldb, TA.db.profile.minimap)
 end
 
--- Shows the UI
-function addon:ShowUI()
-    editBox:SetText(TA.db.profile.trade_text or "")
-    editBox:SetCursorPosition(editBox:GetText():len())
-    mainFrame:Show()
-    editBox:SetFocus()
-end
-
--- Hides the UI
-function addon:HideUI()
-    TA.db.profile.trade_text = editBox:GetText()
-    mainFrame:Hide()
+-- Toggles the UI
+function addon:ToggleUI()
+    if mainFrame:IsShown() then
+        mainFrame:Hide()
+    else
+        editBox:SetCursorPosition(editBox:GetText():len())
+        mainFrame:Show()
+        editBox:SetFocus()
+    end
 end
 
 -- Handles modified click on a item

@@ -301,11 +301,15 @@
         "BNet_GetBNetIDAccount",
         "APPEARANCE_LABEL",
         "KEY_BINDINGS",
-        "Add"
+        "Add",
+        "GameFontDisable",
+        "ScrollingEdit_OnCursorChanged",
+        "OFF"
     ],
     "Lua.diagnostics.disable": [
         "duplicate-set-field",
         "undefined-field",
-        "missing-fields"
+        "missing-fields",
+        "undefined-doc-name"
     ]
 }

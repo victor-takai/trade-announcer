@@ -7,7 +7,7 @@ local settings = {
     main = {
         size = {
             width = 450,
-            height = 150,
+            height = 175,
         },
         padding = 10,
     },
@@ -38,12 +38,10 @@ local settings = {
                 width = 20,
                 height = 20,
             },
-            spacing = 5
+            padding = 5
         },
     },
 }
-
----@diagnostic disable: undefined-doc-name
 
 ---@return Frame|UIPanelDialogTemplate mainFrame
 function addon:CreateMainFrame()
@@ -52,7 +50,13 @@ function addon:CreateMainFrame()
     local height = settings.main.size.height
 
     mainFrame:SetSize(width, height)
-    mainFrame:SetPoint("CENTER", UIParent)
+
+    if TA.db.profile.position.x and TA.db.profile.position.y then
+        mainFrame:SetPoint("CENTER", UIParent, "CENTER", TA.db.profile.position.x, TA.db.profile.position.y)
+    else
+        mainFrame:SetPoint("CENTER", UIParent)
+    end
+
     mainFrame:SetMovable(true)
     mainFrame:EnableMouse(true)
     mainFrame:RegisterForDrag("LeftButton")
@@ -63,15 +67,22 @@ function addon:CreateMainFrame()
             self:StartMoving()
         end
     end)
+
     mainFrame:SetScript("OnMouseUp", function(self, button)
         if button == "LeftButton" then
             self:StopMovingOrSizing()
+            local x, y = self:GetCenter()
+            local px, py = self:GetParent():GetCenter()
+            local cx, cy = x-px, y-py
+            TA.db.profile.position.x = cx
+            TA.db.profile.position.y = cy
         end
     end)
 
     mainFrame:SetScript("OnShow", function(self)
         self:SetMovable(true)
     end)
+
     mainFrame:SetScript("OnHide", function(self)
         self:SetMovable(false)
     end)
@@ -122,25 +133,34 @@ function addon:CreateEditBox(scrollFrame)
     editBox:SetMaxLetters(255)
     editBox:SetAltArrowKeyMode(false)
 
+    editBox:SetScript("OnTextChanged", function(self)
+        TA.db.profile.trade_text = self:GetText()
+    end)
+
     scrollFrame:SetScrollChild(editBox)
 
     return editBox
 end
 
 ---@param mainFrame Frame|UIPanelDialogTemplate
----@return Button|UIPanelButtonTemplate saveButton
-function addon:CreateSaveButton(mainFrame)
-    local saveButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+---@return Button|UIPanelButtonTemplate toggleButton
+function addon:CreateToggleButton(mainFrame)
+    local toggleButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local width = settings.button.size.width + 35
+    local height = settings.button.size.height
 
-    saveButton:SetText("Save")
-    saveButton:SetSize(settings.button.size.width, settings.button.size.height)
-    saveButton:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", settings.main.padding, settings.main.padding)
+    local text = TA.db.profile.is_on and "|cffbf2626OFF|r" or "|cff40c040ON|r"
+    toggleButton:SetText("Turn " .. text)
+    toggleButton:SetSize(width, height)
+    toggleButton:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", settings.main.padding, settings.main.padding)
 
-    saveButton:SetScript("OnClick", function()
-        self:HideUI()
+    toggleButton:SetScript("OnClick", function(self)
+        TA.db.profile.is_on = not TA.db.profile.is_on
+        local text = TA.db.profile.is_on and "|cffbf2626OFF|r" or "|cff40c040ON|r"
+        self:SetText("Turn " .. text)
     end)
 
-    return saveButton
+    return toggleButton
 end
 
 ---@param mainFrame Frame|UIPanelDialogTemplate
@@ -148,9 +168,11 @@ end
 ---@return Button|UIPanelButtonTemplate testButton
 function addon:CreateTestButton(mainFrame, editBox)
     local testButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local width = settings.button.size.width
+    local height = settings.button.size.height
 
     testButton:SetText("Test")
-    testButton:SetSize(settings.button.size.width, settings.button.size.height)
+    testButton:SetSize(width, height)
     testButton:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -settings.main.padding + 3, settings.main.padding)
 
     testButton:SetScript("OnClick", function()
@@ -180,11 +202,25 @@ function addon:CreateProfessionButtons(mainFrame, saveButton, editBox)
 
     if firstProfession then
         local name, icon, _, _, _, _, skillLine = GetProfessionInfo(firstProfession)
-        firstProfessionButton = self:CreateProfessionButton(name, icon, skillLine, mainFrame, editBox, saveButton)
+        firstProfessionButton = self:CreateProfessionButton(
+            name,
+            icon,
+            skillLine,
+            mainFrame,
+            editBox,
+            saveButton
+        )
     end
     if secondProfession then
         local name, icon, _, _, _, _, skillLine = GetProfessionInfo(secondProfession)
-        secondProfessionButton = self:CreateProfessionButton(name, icon, skillLine, mainFrame, editBox, firstProfessionButton or saveButton)
+        secondProfessionButton = self:CreateProfessionButton(
+            name,
+            icon,
+            skillLine,
+            mainFrame,
+            editBox,
+            firstProfessionButton or saveButton
+        )
     end
 
     return firstProfessionButton, secondProfessionButton
@@ -200,14 +236,14 @@ end
 function addon:CreateProfessionButton(name, icon, skillLineId, mainFrame, editBox, relativeButton)
     local width = settings.profession.button.size.width
     local height = settings.profession.button.size.height
-    local spacing = settings.profession.button.spacing
+    local padding = settings.profession.button.padding
     local button = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
 
     button:SetNormalTexture(icon)
     button:SetPushedTexture(icon)
     button:SetHighlightTexture(icon)
     button:SetSize(width, height)
-    button:SetPoint("RIGHT", relativeButton, "RIGHT", width + spacing, 0)
+    button:SetPoint("RIGHT", relativeButton, "RIGHT", width + padding, 0)
 
     button:SetScript("OnClick", function()
         editBox:Insert(self:GetLinkForProfession(skillLineId))
@@ -233,7 +269,7 @@ function addon:GetLinkForProfession(skillLineId)
 
     if skillLineId then
         C_TradeSkillUI.OpenTradeSkill(skillLineId)
-        link = (C_TradeSkillUI.GetTradeSkillListLink())
+        link = C_TradeSkillUI.GetTradeSkillListLink()
         C_TradeSkillUI.CloseTradeSkill()
     end
 
