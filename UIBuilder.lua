@@ -1,4 +1,4 @@
--- FrameBuilder.lua
+-- UIBuilder.lua
 
 local _, addon = ...
 
@@ -57,6 +57,7 @@ function addon:CreateMainFrame()
         mainFrame:SetPoint("CENTER", UIParent)
     end
 
+    mainFrame:SetToplevel(true)
     mainFrame:SetMovable(true)
     mainFrame:EnableMouse(true)
     mainFrame:RegisterForDrag("LeftButton")
@@ -92,7 +93,7 @@ end
 
 ---@param mainFrame Frame|UIPanelDialogTemplate
 ---@return FontString label
-function addon:CreateMainFrameLabel(mainFrame)
+function addon:CreateLabel(mainFrame)
     local label = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
     label:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", settings.title.padding.x, settings.title.padding.y)
@@ -135,6 +136,11 @@ function addon:CreateEditBox(scrollFrame)
 
     editBox:SetScript("OnTextChanged", function(self)
         TA.db.profile.trade_text = self:GetText()
+        -- print(TA.db.profile.trade_text)
+    end)
+
+    editBox:SetScript("OnEscapePressed", function()
+        addon:HideUI()
     end)
 
     scrollFrame:SetScrollChild(editBox)
@@ -149,15 +155,17 @@ function addon:CreateToggleButton(mainFrame)
     local width = settings.button.size.width + 35
     local height = settings.button.size.height
 
-    local text = TA.db.profile.is_on and "|cffbf2626OFF|r" or "|cff40c040ON|r"
+    local text = addon:GetToggleText(TA.db.profile.is_on)
     toggleButton:SetText("Turn " .. text)
     toggleButton:SetSize(width, height)
     toggleButton:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", settings.main.padding, settings.main.padding)
 
     toggleButton:SetScript("OnClick", function(self)
         TA.db.profile.is_on = not TA.db.profile.is_on
-        local text = TA.db.profile.is_on and "|cffbf2626OFF|r" or "|cff40c040ON|r"
+        local text = addon:GetToggleText(TA.db.profile.is_on)
+        local inversedText = addon:GetToggleText(not TA.db.profile.is_on)
         self:SetText("Turn " .. text)
+        print("Your trade message was turned " .. inversedText)
     end)
 
     return toggleButton
@@ -274,4 +282,17 @@ function addon:GetLinkForProfession(skillLineId)
     end
 
     return link
+end
+
+function addon:CreateUI()
+    self:CreateMinimapButton()
+    local mainFrame = self:CreateMainFrame()
+    self:CreateLabel(mainFrame)
+    local scrollFrame = self:CreateScrollFrame(mainFrame)
+    local editBox = self:CreateEditBox(scrollFrame)
+    local toggleButton = self:CreateToggleButton(mainFrame)
+    self:CreateTestButton(mainFrame, editBox)
+    self:CreateProfessionButtons(mainFrame, toggleButton, editBox)
+
+    return mainFrame, editBox
 end

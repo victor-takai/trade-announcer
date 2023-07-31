@@ -6,9 +6,10 @@ local addonName, addon = ...
 -- Variables for UI
 local mainFrame
 local editBox
+local pixelFrame
 
 --- AceAddon reference
-TA = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0")
+TA = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceHook-3.0")
 
 -- Defaults for AceDB
 local defaults = {
@@ -22,25 +23,30 @@ local defaults = {
         },
         trade_text = "",
         is_on = false,
+        rate = 5,
     },
 }
 
--- AceAddon methods
 ----------------------------------------------------------------------------------------
 
 function TA:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("TradeAnnouncerDB", defaults)
     self:RegisterChatCommand("ta", "SlashCommand")
 
-    addon:SetupAddon()
+    addon:SetupUI()
+    addon:SetupOnUpdate()
 end
 
 function TA:OnEnable()
-	-- Called when the addon is enabled
+    print("Secure Hooked 'HandleModifiedItemClick' Script")
+    self:SecureHook("HandleModifiedItemClick", function(link)
+        editBox:Insert(link)
+    end)
 end
 
 function TA:OnDisable()
-	-- Called when the addon is disabled
+    print("Unhooked 'HandleModifiedItemClick' Script")
+    self:Unhook("HandleModifiedItemClick")
 end
 
 function TA:SlashCommand()
@@ -50,15 +56,25 @@ end
 ----------------------------------------------------------------------------------------
 
 --- Creates the UI
-function addon:SetupAddon()
-    self:CreateMinimapButton()
-    mainFrame = self:CreateMainFrame()
-    self:CreateMainFrameLabel(mainFrame)
-    local scrollFrame = self:CreateScrollFrame(mainFrame)
-    editBox = self:CreateEditBox(scrollFrame)
-    local toggleButton = self:CreateToggleButton(mainFrame)
-    self:CreateTestButton(mainFrame, editBox)
-    self:CreateProfessionButtons(mainFrame, toggleButton, editBox)
+function addon:SetupUI()
+    mainFrame, editBox = self:CreateUI()
+    self:CreateInterfaceOptions()
+end
+
+function addon:SetupOnUpdate()
+    pixelFrame = CreateFrame("Frame")
+    pixelFrame:SetFrameStrata("HIGH")
+    pixelFrame:SetToplevel(true)
+    pixelFrame:SetMovable(false)
+    pixelFrame:EnableMouse(false)
+
+    pixelFrame.timeSinceLastUpdate = 0
+	pixelFrame:SetScript("OnUpdate", OnUpdate)
+end
+
+-- Generates colored text based on boolean
+function addon:GetToggleText(isOn)
+    return isOn and "|cffbf2626OFF|r" or "|cff40c040ON|r"
 end
 
 -- Creates the minimap button
@@ -84,17 +100,42 @@ end
 -- Toggles the UI
 function addon:ToggleUI()
     if mainFrame:IsShown() then
-        mainFrame:Hide()
+        self:HideUI()
     else
-        editBox:SetCursorPosition(editBox:GetText():len())
-        mainFrame:Show()
-        editBox:SetFocus()
+        self:ShowUI()
     end
 end
 
--- Handles modified click on a item
-hooksecurefunc("HandleModifiedItemClick", function(link)
-    -- if itemLocation and itemLocation:IsBagAndSlot() and editBox:IsShown() then
-        editBox:Insert(link)
-    -- end
-end)
+-- Hides the UI
+function addon:ShowUI()
+    local text = TA.db.profile.trade_text
+    if text ~= "" and editBox:GetText() == "" then
+        editBox:SetText(text)
+        editBox:SetCursorPosition(editBox:GetText():len())
+    end
+    mainFrame:Show()
+    editBox:SetFocus()
+end
+
+-- Shows the UI
+function addon:HideUI()
+    mainFrame:Hide()
+end
+
+----------------------------------------------------------------------------------------
+
+function OnUpdate(self, elapsed)
+	if not TA.db.profile.is_on or MessageQueue.GetNumPendingMessages() > 0 then
+        return
+    end
+
+	self.timeSinceLastUpdate = self.timeSinceLastUpdate + elapsed
+    local message = TA.db.profile.trade_text
+
+	if self.timeSinceLastUpdate > TA.db.profile.rate then
+        if message ~= "" then
+            MessageQueue.SendChatMessage(message, "GUILD", nil, nil)
+        end
+		self.timeSinceLastUpdate = 0
+	end
+end
