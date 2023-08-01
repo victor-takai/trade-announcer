@@ -21,7 +21,7 @@ local defaults = {
         },
         trade_text = "",
         is_on = false,
-        rate = 30, -- Default time interval
+        interval = 30, -- Default time interval
         channel_value = 1 -- Default channel id
     },
 }
@@ -85,11 +85,14 @@ function addon:CreateMinimapButton()
         OnClick = function(_, button)
             if button == "LeftButton" then
                 self:ToggleUI()
+            elseif button == "RightButton" then
+                InterfaceOptionsFrame_OpenToCategory("TradeAnnouncer")
             end
         end,
         OnTooltipShow = function(tooltip)
             tooltip:AddLine(addonName)
-            tooltip:AddLine("Left-click to open input box.", 1, 1, 1, 1)
+            tooltip:AddLine("|cff6699ffLeft-click|r to open input box.", 1, 1, 1)
+            tooltip:AddLine("|cff6699ffRight-click|r to show options.", 1, 1, 1)
         end,
     })
 
@@ -131,7 +134,7 @@ function OnUpdate(self, elapsed)
 	self.timeSinceLastUpdate = self.timeSinceLastUpdate + elapsed
     local message = TA.db.profile.trade_text
 
-	if self.timeSinceLastUpdate > TA.db.profile.rate then
+	if self.timeSinceLastUpdate > TA.db.profile.interval then
         if message ~= "" then
             MessageQueue.SendChatMessage(message, "GUILD", nil, nil)
         end
