@@ -1,5 +1,3 @@
--- Core.lua
-
 --- Addon name, namespace
 local addonName, addon = ...
 

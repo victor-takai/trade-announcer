@@ -5,7 +5,7 @@
 ## SavedVariables: TradeAnnouncerDB
 ## RequiredDeps: MessageQueue
 
-Embeds.xml
-Core.lua
-UIBuilder.lua
-IOBuilder.lua
+embeds.xml
+core.lua
+builder.lua
+options.lua

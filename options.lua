@@ -1,5 +1,3 @@
--- IOBuilder.lua
-
 local addonName, addon = ...
 
 ---@enum Enum.ChannelType

@@ -1,5 +1,3 @@
--- UIBuilder.lua
-
 local _, addon = ...
 
 --- Settings

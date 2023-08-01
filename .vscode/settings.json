@@ -376,8 +376,9 @@
     ],
     "Lua.diagnostics.disable": [
         "duplicate-set-field",
-        "undefined-field",
         "missing-fields",
-        "undefined-doc-name"
+        "undefined-field",
+        "undefined-doc-name",
+        "undefined-global"
     ]
 }
