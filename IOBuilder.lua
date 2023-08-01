@@ -11,6 +11,7 @@ local ChannelType = {
     Instance = 5,
     Battleground = 6,
     Guild = 7,
+    Officer = 8,
 }
 
 function addon:CreateInterfaceOptions()
@@ -21,13 +22,35 @@ function addon:CreateInterfaceOptions()
     title:SetPoint("TOPLEFT", 16, -16)
     title:SetText(addonName)
 
-    local values = {}
+    local channels = {}
     for key, value in pairs(ChannelType) do
-        values[value] = key
+        channels[value] = key
     end
 
-    local dropDown = self:CreateDropdown(panel, "ChannelDropdown", values)
-    dropDown:SetPoint("TOPLEFT", title, "BOTTOMLEFT", -18, -16)
+    local channelDropDown = self:CreateDropdown(panel, "ChannelDropdown", channels)
+    channelDropDown:SetPoint("TOPLEFT", title, "BOTTOMLEFT", -18, -16)
+
+    local channelValue = TA.db.profile.channel_value
+    if channelValue then
+        UIDropDownMenu_SetSelectedValue(channelDropDown, channelValue)
+        UIDropDownMenu_SetText(channelDropDown, channels[channelValue])
+    end
+
+    local slider = CreateFrame("Slider", "DurationSlider" , panel, "OptionsSliderTemplate")
+    slider:SetPoint("TOPLEFT", channelDropDown, "BOTTOMLEFT", 18, -16)
+    slider:SetWidth(160)
+	slider:SetMinMaxValues(10, 60)
+	slider:SetValue(30)
+	slider:SetValueStep(1)
+	slider:SetObeyStepOnDrag(true)
+	slider:SetOrientation("HORIZONTAL")
+
+    _G[slider:GetName() .. "Low"]:SetText("10s")
+	_G[slider:GetName() .. "High"]:SetText("60s")
+
+	slider:SetScript("OnValueChanged", function(self, value, userInput)
+        TA.db.profile.rate = value
+	end)
 
 	InterfaceOptions_AddCategory(panel)
 end
@@ -38,12 +61,17 @@ function addon:CreateDropdown(parent, name, values)
 
     UIDropDownMenu_SetWidth(dropDown, 150)
     UIDropDownMenu_SetText(dropDown, "Set the channel")
-    -- UIDropDownMenu_JustifyText(dropDown, "LEFT")
-    UIDropDownMenu_Initialize(dropDown, function(self, level, menuList)
+    UIDropDownMenu_Initialize(dropDown, function()
         local info = UIDropDownMenu_CreateInfo()
         for key, value in pairs(values) do
             info.text = value
             info.value = key
+            info.func = function(self)
+                TA.db.profile.channel_value = self.value
+                UIDropDownMenu_SetSelectedValue(dropDown, self.value)
+                UIDropDownMenu_SetText(dropDown, self:GetText())
+            end
+            info.checked = value == TA.db.profile.channel_value
             UIDropDownMenu_AddButton(info)
         end
     end)

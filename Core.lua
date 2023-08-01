@@ -23,7 +23,8 @@ local defaults = {
         },
         trade_text = "",
         is_on = false,
-        rate = 5,
+        rate = 30, -- Default time interval
+        channel_value = 1 -- Default channel id
     },
 }
 
