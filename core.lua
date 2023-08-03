@@ -49,7 +49,7 @@ function TA:OnEnable()
 end
 
 function TA:OnDisable()
-    print("Unhooked 'HandleModifiedItemClick' Script")
+    -- print("Unhooked 'HandleModifiedItemClick' Script")
     self:Unhook("HandleModifiedItemClick")
 end
 
@@ -106,7 +106,7 @@ function addon:CreateMinimapButton()
             if button == "LeftButton" then
                 self:ToggleUI()
             elseif button == "RightButton" then
-                InterfaceOptionsFrame_OpenToCategory("TradeAnnouncer")
+                InterfaceOptionsFrame_OpenToCategory(addonName)
             end
         end,
         OnTooltipShow = function(tooltip)

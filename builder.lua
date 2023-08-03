@@ -1,5 +1,5 @@
 --- Addon name, namespace
-local _, addon = ...
+local addonName, addon = ...
 
 --- Settings
 local settings = {
@@ -24,21 +24,19 @@ local settings = {
         spacing = 25
     },
 
-    button = {
+    defaultButtons = {
         size = {
             width = 50,
             height = 25,
         },
     },
 
-    profession = {
-        button = {
-            size = {
-                width = 20,
-                height = 20,
-            },
-            padding = 5
+    smallButtons = {
+        size = {
+            width = 20,
+            height = 20,
         },
+        padding = 5
     },
 }
 
@@ -107,7 +105,7 @@ end
 ---@return ScrollFrame|UIPanelScrollFrameTemplate scrollFrame
 function addon:CreateScrollFrame(mainFrame)
     local width = settings.main.size.width - (settings.main.padding * 2) - settings.scroll.barSpacing - settings.scroll.adjustSpacing
-    local height = settings.main.size.height - settings.button.size.height - (settings.main.padding * 3) - settings.title.spacing
+    local height = settings.main.size.height - settings.defaultButtons.size.height - (settings.main.padding * 3) - settings.title.spacing
     local pointX = settings.main.padding + settings.scroll.adjustSpacing
     local pointY = -(settings.main.padding + settings.title.spacing)
 
@@ -159,8 +157,8 @@ end
 ---@return Button|UIPanelButtonTemplate toggleButton
 function addon:CreateToggleButton(mainFrame)
     local toggleButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    local width = settings.button.size.width + 35
-    local height = settings.button.size.height
+    local width = settings.defaultButtons.size.width + 35
+    local height = settings.defaultButtons.size.height
 
     local text = addon:GetToggleText(TA.db.profile.is_on)
     toggleButton:SetText("Turn " .. text)
@@ -179,8 +177,8 @@ end
 ---@return Button|UIPanelButtonTemplate testButton
 function addon:CreateTestButton(mainFrame, editBox)
     local testButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    local width = settings.button.size.width
-    local height = settings.button.size.height
+    local width = settings.defaultButtons.size.width
+    local height = settings.defaultButtons.size.height
 
     testButton:SetText("Test")
     testButton:SetSize(width, height)
@@ -201,6 +199,35 @@ function addon:CreateTestButton(mainFrame, editBox)
     end)
 
     return testButton
+end
+
+function addon:CreateSettingsButton(mainFrame, relativeButton)
+    local button = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local width = settings.smallButtons.size.width
+    local height = settings.smallButtons.size.height
+    local padding = settings.smallButtons.padding
+    local icon = "Interface\\Icons\\INV_Misc_Gear_06"
+
+    button:SetNormalTexture(icon)
+    button:SetPushedTexture(icon)
+    button:SetSize(width, height)
+    button:SetPoint("RIGHT", relativeButton, "LEFT", -padding, 0)
+
+    button:SetScript("OnClick", function()
+        InterfaceOptionsFrame_OpenToCategory(addonName)
+    end)
+
+    button:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self or UIParent, "ANCHOR_BOTTOM")
+        GameTooltip:SetText("Opens settings page", 1, 1, 1, 0.5)
+        GameTooltip:Show()
+    end)
+
+    button:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+
+    return button
 end
 
 ---@param mainFrame Frame|UIPanelDialogTemplate
@@ -245,14 +272,13 @@ end
 ---@param relativeButton Button|UIPanelButtonTemplate
 ---@return Button|UIPanelButtonTemplate button
 function addon:CreateProfessionButton(name, icon, skillLineId, mainFrame, editBox, relativeButton)
-    local width = settings.profession.button.size.width
-    local height = settings.profession.button.size.height
-    local padding = settings.profession.button.padding
     local button = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local width = settings.smallButtons.size.width
+    local height = settings.smallButtons.size.height
+    local padding = settings.smallButtons.padding
 
     button:SetNormalTexture(icon)
     button:SetPushedTexture(icon)
-    button:SetHighlightTexture(icon)
     button:SetSize(width, height)
     button:SetPoint("RIGHT", relativeButton, "RIGHT", width + padding, 0)
 
@@ -294,7 +320,8 @@ function addon:CreateUI()
     local scrollFrame = self:CreateScrollFrame(mainFrame)
     local editBox = self:CreateEditBox(scrollFrame)
     local toggleButton = self:CreateToggleButton(mainFrame)
-    self:CreateTestButton(mainFrame, editBox)
+    local testButton = self:CreateTestButton(mainFrame, editBox)
+    self:CreateSettingsButton(mainFrame, testButton)
     self:CreateProfessionButtons(mainFrame, toggleButton, editBox)
 
     return mainFrame, editBox
