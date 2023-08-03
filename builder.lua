@@ -1,3 +1,4 @@
+--- Addon name, namespace
 local _, addon = ...
 
 --- Settings

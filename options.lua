@@ -1,15 +1,17 @@
+--- Addon name, namespace
 local addonName, addon = ...
 
----@enum Enum.ChannelType
-local ChannelType = {
-    Say = 1,
-    Yell = 2,
-    Party = 3,
-    Raid = 4,
-    Instance = 5,
-    Battleground = 6,
-    Guild = 7,
-    Officer = 8,
+---@enum Enum.ChatType
+local ChatType = {
+    Channel = 1,
+    Say = 2,
+    Yell = 3,
+    Party = 4,
+    Raid = 5,
+    Instance = 6,
+    Battleground = 7,
+    Guild = 8,
+    Officer = 9,
 }
 
 function addon:CreateInterfaceOptions()
@@ -21,76 +23,125 @@ function addon:CreateInterfaceOptions()
     title:SetText(addonName)
 
     local channelDropDown = self:CreateIntervalDropdown(panel, title, "ChannelDropdown")
-
-    self:CreateIntervalSlider(panel, channelDropDown, "IntervalSlider")
+    local intervalSlider = self:CreateIntervalSlider(panel, channelDropDown, "IntervalSlider")
 
 	InterfaceOptions_AddCategory(panel)
+
+    return title, channelDropDown, intervalSlider
 end
 
 function addon:CreateIntervalDropdown(parent, reference, name)
-    local channels = {}
-    for key, value in pairs(ChannelType) do
-        channels[value] = key
+    local chatTypes = {}
+    for key, value in pairs(ChatType) do
+        chatTypes[value] = key
     end
 
-    local dropDownTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    local joinedChannels = self:GetJoinedChannels()
+
+    local dropDownTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     dropDownTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 0, -16)
-	dropDownTitle:SetText("Channel")
-	dropDownTitle:SetJustifyH("LEFT")
-	dropDownTitle:SetWidth(250)
+	dropDownTitle:SetText("Chat type")
+    dropDownTitle:SetJustifyH("LEFT")
+	dropDownTitle:SetWidth(200)
 
     local dropDown = CreateFrame("Frame", name, parent, "UIDropDownMenuTemplate")
     dropDown:SetPoint("TOPLEFT", dropDownTitle, "BOTTOMLEFT", -18, -5)
 
-    UIDropDownMenu_SetWidth(dropDown, 150)
-    UIDropDownMenu_SetText(dropDown, "Set the channel")
-    UIDropDownMenu_Initialize(dropDown, function()
+    UIDropDownMenu_SetWidth(dropDown, 200)
+    UIDropDownMenu_SetText(dropDown, "Set the chat type")
+    UIDropDownMenu_JustifyText(dropDown, "LEFT")
+
+    UIDropDownMenu_Initialize(dropDown, function(_, level, menuList)
         local info = UIDropDownMenu_CreateInfo()
-        for key, value in pairs(channels) do
-            info.text = value
-            info.value = key
-            info.func = function(self)
-                TA.db.profile.channel_value = self.value
-                UIDropDownMenu_SetSelectedValue(dropDown, self.value)
-                UIDropDownMenu_SetText(dropDown, self:GetText())
+
+        if (level or 1) == 1 then
+            for value, text in pairs(chatTypes) do
+                info.text = text
+                info.value = value
+                info.func = function(self)
+                    if self.value ~= 1 then
+                        TA.db.profile.chat_type = self.value
+                        TA.db.profile.channel_type = nil
+                        UIDropDownMenu_SetText(dropDown, self:GetText())
+                    end
+                end
+                if value == 1 then
+                    info.menuList = "Channels"
+                    info.hasArrow = true
+                else
+                    info.menuList = nil
+                    info.hasArrow = false
+                end
+                info.checked = value == TA.db.profile.chat_type
+                UIDropDownMenu_AddButton(info, level)
             end
-            info.checked = value == TA.db.profile.channel_value
-            UIDropDownMenu_AddButton(info)
+        elseif menuList == "Channels" then
+            for _, channel in pairs(joinedChannels) do
+                -- if not channel.isDisabled then
+                    info.text = channel.name
+                    info.value = channel.id
+                    info.func = function(self)
+                        TA.db.profile.chat_type = 1
+                        TA.db.profile.channel_type = self.value
+                        UIDropDownMenu_SetText(dropDown, chatTypes[1] .. ": " .. self:GetText())
+                        CloseDropDownMenus()
+                    end
+                    info.checked = channel.id == TA.db.profile.channel_type
+                    UIDropDownMenu_AddButton(info, level)
+                -- end
+            end
         end
     end)
 
-    local channelValue = TA.db.profile.channel_value
-    if channelValue then
-        UIDropDownMenu_SetSelectedValue(dropDown, channelValue)
-        UIDropDownMenu_SetText(dropDown, channels[channelValue])
+    --- Loads last selected chat type
+    local chatType = TA.db.profile.chat_type
+    local channelType = TA.db.profile.channel_type
+
+    if chatType then
+        local channelName
+
+        if chatType == 1 then
+            for _, channel in pairs(joinedChannels) do
+                if channel.id == channelType then
+                    channelName = channel.name
+                    break
+                end
+            end
+        end
+
+        if channelName then
+            UIDropDownMenu_SetText(dropDown, chatTypes[chatType] .. ": " .. channelName)
+        else
+            UIDropDownMenu_SetText(dropDown, chatTypes[chatType])
+        end
     end
 
     return dropDown
 end
 
 function addon:CreateIntervalSlider(parent, reference, name)
-    local sliderTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    sliderTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 18, -20)
-	sliderTitle:SetText("Interval")
+    local sliderTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    sliderTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 18, -16)
+	sliderTitle:SetText("Interval (seconds)")
 	sliderTitle:SetJustifyH("LEFT")
-	sliderTitle:SetWidth(250)
+	sliderTitle:SetWidth(200)
 
     local sliderValueText = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 
     local slider = CreateFrame("Slider", name , parent, "OptionsSliderTemplate")
     slider:SetPoint("TOPLEFT", sliderTitle, "BOTTOMLEFT", 0, -5)
-    slider:SetWidth(160)
-	slider:SetMinMaxValues(10, 60)
+    slider:SetWidth(200)
+	slider:SetMinMaxValues(10, 120)
 	slider:SetValue(30)
 	slider:SetValueStep(1)
 	slider:SetObeyStepOnDrag(true)
 	slider:SetOrientation("HORIZONTAL")
 
     _G[slider:GetName() .. "Low"]:SetText("10s")
-	_G[slider:GetName() .. "High"]:SetText("60s")
+	_G[slider:GetName() .. "High"]:SetText("120s")
     -- _G[slider:GetName() .. "Text"]:SetText("Interval")
 
-	slider:SetScript("OnValueChanged", function(self, value, userInput)
+	slider:SetScript("OnValueChanged", function(_, value, userInput)
         TA.db.profile.interval = value
         sliderValueText:SetText("|cffffcc00" .. value .. "s|r")
 	end)

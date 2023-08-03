@@ -1,7 +1,7 @@
 --- Addon name, namespace
 local addonName, addon = ...
 
--- Variables for UI
+--- Variables for UI
 local mainFrame
 local editBox
 local pixelFrame
@@ -22,7 +22,8 @@ local defaults = {
         trade_text = "",
         is_on = false,
         interval = 30, -- Default time interval
-        channel_value = 1 -- Default channel id
+        chat_type = 1, -- Default chat
+        channel_type = nil -- Default channel
     },
 }
 
@@ -60,6 +61,7 @@ function addon:SetupUI()
     self:CreateInterfaceOptions()
 end
 
+--- Creates invisible frame for tracking time
 function addon:SetupOnUpdate()
     pixelFrame = CreateFrame("Frame")
     pixelFrame:SetFrameStrata("HIGH")
@@ -74,6 +76,20 @@ end
 -- Generates colored text based on boolean
 function addon:GetToggleText(isOn)
     return isOn and "|cffbf2626OFF|r" or "|cff40c040ON|r"
+end
+
+--- Gets all joined channels
+function addon:GetJoinedChannels()
+    local channels = { }
+    local channelList = { GetChannelList() }
+    for i = 1, #channelList, 3 do
+        table.insert(channels, {
+            id = channelList[i],
+            name = channelList[i+1],
+            isDisabled = channelList[i+2],
+        })
+    end
+    return channels
 end
 
 -- Creates the minimap button
@@ -126,6 +142,31 @@ end
 
 ----------------------------------------------------------------------------------------
 
+---@param channelNumber string
+---@return string|nil chatType, number|nil target
+function GetChannel(channelNumber)
+	if channelNumber == 1 then
+		return "SAY", nil
+	elseif channelNumber == 2 then
+		return "YELL", nil
+	elseif channelNumber == 3 then
+		return "PARTY", nil
+	elseif channelNumber == 4 then
+		return "RAID", nil
+	elseif channelNumber == 5 then
+		return "INSTANCE_CHAT", nil
+	elseif channelNumber == 6 then
+		return "BATTLEGROUND", nil
+    elseif channelNumber == 7 then
+		return "GUILD", nil
+    elseif channelNumber == 8 then
+		return "OFFICER", nil
+	elseif channelNumber == 9 then
+		return "CHANNEL", 2 -- Trade
+	end
+	return nil
+end
+
 function OnUpdate(self, elapsed)
 	if not TA.db.profile.is_on or MessageQueue.GetNumPendingMessages() > 0 then
         return
@@ -136,7 +177,8 @@ function OnUpdate(self, elapsed)
 
 	if self.timeSinceLastUpdate > TA.db.profile.interval then
         if message ~= "" then
-            MessageQueue.SendChatMessage(message, "GUILD", nil, nil)
+            local chatType, target = GetChannel(Ta.db.profile.channel_value)
+            MessageQueue.SendChatMessage(message, chatType, nil, target)
         end
 		self.timeSinceLastUpdate = 0
 	end
