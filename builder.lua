@@ -138,6 +138,14 @@ function addon:CreateEditBox(scrollFrame)
         -- print(TA.db.profile.trade_text)
     end)
 
+    editBox:SetScript("OnEditFocusGained", function()
+        addon:OnFocusGained()
+    end)
+
+    editBox:SetScript("OnEditFocusLost", function()
+        addon:OnFocusLost()
+    end)
+
     editBox:SetScript("OnEscapePressed", function()
         addon:HideUI()
     end)
@@ -160,11 +168,7 @@ function addon:CreateToggleButton(mainFrame)
     toggleButton:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", settings.main.padding, settings.main.padding)
 
     toggleButton:SetScript("OnClick", function(self)
-        TA.db.profile.is_on = not TA.db.profile.is_on
-        local text = addon:GetToggleText(TA.db.profile.is_on)
-        local inversedText = addon:GetToggleText(not TA.db.profile.is_on)
-        self:SetText("Turn " .. text)
-        print("Your trade message was turned " .. inversedText)
+        addon:ToggleMessage(self)
     end)
 
     return toggleButton

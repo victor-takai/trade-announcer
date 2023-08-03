@@ -18,9 +18,10 @@ function addon:CreateInterfaceOptions()
     local panel = CreateFrame("Frame")
     panel.name = addonName
 
+    local version = GetAddOnMetadata(addonName, "Version")
     local title = panel:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 16, -16)
-    title:SetText(addonName)
+    title:SetText(addonName .. " |cffffff99v" .. version .. "|r")
 
     local channelDropDown = self:CreateIntervalDropdown(panel, title, "ChannelDropdown")
     local intervalSlider = self:CreateIntervalSlider(panel, channelDropDown, "IntervalSlider")
@@ -77,7 +78,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
             end
         elseif menuList == "Channels" then
             for _, channel in pairs(joinedChannels) do
-                -- if not channel.isDisabled then
+                if not channel.isDisabled then
                     info.text = channel.name
                     info.value = channel.id
                     info.func = function(self)
@@ -88,7 +89,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
                     end
                     info.checked = channel.id == TA.db.profile.channel_type
                     UIDropDownMenu_AddButton(info, level)
-                -- end
+                end
             end
         end
     end)
@@ -139,9 +140,8 @@ function addon:CreateIntervalSlider(parent, reference, name)
 
     _G[slider:GetName() .. "Low"]:SetText("10s")
 	_G[slider:GetName() .. "High"]:SetText("120s")
-    -- _G[slider:GetName() .. "Text"]:SetText("Interval")
 
-	slider:SetScript("OnValueChanged", function(_, value, userInput)
+	slider:SetScript("OnValueChanged", function(_, value)
         TA.db.profile.interval = value
         sliderValueText:SetText("|cffffcc00" .. value .. "s|r")
 	end)
@@ -149,7 +149,7 @@ function addon:CreateIntervalSlider(parent, reference, name)
     sliderValueText:SetPoint("CENTER", slider, 0, -10)
 	sliderValueText:SetText("|cffffcc00" .. TA.db.profile.interval .. "s|r")
 	sliderValueText:SetJustifyH("CENTER")
-	sliderValueText:SetWidth(32)
+	sliderValueText:SetWidth(100)
 
     return slider
 end

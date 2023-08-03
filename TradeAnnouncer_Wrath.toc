@@ -1,0 +1,11 @@
+## Interface: 30402
+## Title: TradeAnnouncer
+## Version: 1.0
+## Author: Kalivos
+## SavedVariables: TradeAnnouncerDB
+## RequiredDeps: MessageQueue
+
+embeds.xml
+core.lua
+builder.lua
+options.lua
