@@ -1,17 +1,19 @@
 --- Addon name, namespace
 local addonName, addon = ...
 
+--- Locale
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
+
 --- Variables
 local mainFrame
 local editBox
-local pixelFrame
-
+local updateFrame
 local isEditBoxOnFocus = false
 
 --- AceAddon reference
 TA = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceHook-3.0")
 
--- Defaults for AceDB
+--- Defaults for AceDB
 local defaults = {
     profile = {
         position = {
@@ -67,14 +69,14 @@ end
 
 --- Creates invisible frame for tracking time
 function addon:SetupOnUpdate()
-    pixelFrame = CreateFrame("Frame")
-    pixelFrame:SetFrameStrata("HIGH")
-    pixelFrame:SetToplevel(true)
-    pixelFrame:SetMovable(false)
-    pixelFrame:EnableMouse(false)
+    updateFrame = CreateFrame("Frame")
+    updateFrame:SetFrameStrata("HIGH")
+    updateFrame:SetToplevel(true)
+    updateFrame:SetMovable(false)
+    updateFrame:EnableMouse(false)
 
-    pixelFrame.timeSinceLastUpdate = 0
-	pixelFrame:SetScript("OnUpdate", OnUpdate)
+    updateFrame.timeSinceLastUpdate = 0
+	updateFrame:SetScript("OnUpdate", OnUpdate)
 end
 
 -- Generates colored text based on boolean
@@ -96,7 +98,7 @@ function addon:GetJoinedChannels()
     return channels
 end
 
--- Creates the minimap button
+--- Creates the minimap button
 function addon:CreateMinimapButton()
     local ldb = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
         type = "data source",
@@ -119,7 +121,7 @@ function addon:CreateMinimapButton()
     LibStub("LibDBIcon-1.0"):Register(addonName, ldb, TA.db.profile.minimap)
 end
 
--- Toggles auto message
+--- Toggles auto message
 function addon:ToggleMessage(toggleButton)
     if TA.db.profile.chat_type or TA.db.profile.channel_type then
         TA.db.profile.is_on = not TA.db.profile.is_on
@@ -136,7 +138,7 @@ function addon:ToggleMessage(toggleButton)
     end
 end
 
--- Toggles the UI
+--- Toggles the UI
 function addon:ToggleUI()
     if mainFrame:IsShown() then
         self:HideUI()
@@ -145,7 +147,7 @@ function addon:ToggleUI()
     end
 end
 
--- Hides the UI
+--- Hides the UI
 function addon:ShowUI()
     local text = TA.db.profile.trade_text
     if text ~= "" and editBox:GetText() == "" then
@@ -156,17 +158,17 @@ function addon:ShowUI()
     editBox:SetFocus()
 end
 
--- Shows the UI
+--- Shows the UI
 function addon:HideUI()
     mainFrame:Hide()
 end
 
--- Trigered when EditBox gains focus
+--- Trigered when EditBox gains focus
 function addon:OnFocusGained()
     isEditBoxOnFocus = true
 end
 
--- Trigered when EditBox loses focus
+--- Trigered when EditBox loses focus
 function addon:OnFocusLost()
     isEditBoxOnFocus = false
 end

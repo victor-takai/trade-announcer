@@ -1,6 +1,9 @@
 --- Addon name, namespace
 local addonName, addon = ...
 
+--- Locale
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
+
 --- Settings
 local settings = {
     main = {
@@ -40,7 +43,7 @@ local settings = {
     },
 }
 
----@return Frame|UIPanelDialogTemplate mainFrame
+--- @return Frame|UIPanelDialogTemplate mainFrame
 function addon:CreateMainFrame()
     local mainFrame = CreateFrame("Frame", nil, UIParent, "UIPanelDialogTemplate")
     local width = settings.main.size.width
@@ -60,36 +63,36 @@ function addon:CreateMainFrame()
     mainFrame:RegisterForDrag("LeftButton")
     mainFrame:Hide()
 
-    mainFrame:SetScript("OnMouseDown", function(self, button)
+    mainFrame:SetScript("OnMouseDown", function(this, button)
         if button == "LeftButton" then
-            self:StartMoving()
+            this:StartMoving()
         end
     end)
 
-    mainFrame:SetScript("OnMouseUp", function(self, button)
+    mainFrame:SetScript("OnMouseUp", function(this, button)
         if button == "LeftButton" then
-            self:StopMovingOrSizing()
-            local x, y = self:GetCenter()
-            local px, py = self:GetParent():GetCenter()
+            this:StopMovingOrSizing()
+            local x, y = this:GetCenter()
+            local px, py = this:GetParent():GetCenter()
             local cx, cy = x-px, y-py
             TA.db.profile.position.x = cx
             TA.db.profile.position.y = cy
         end
     end)
 
-    mainFrame:SetScript("OnShow", function(self)
-        self:SetMovable(true)
+    mainFrame:SetScript("OnShow", function(this)
+        this:SetMovable(true)
     end)
 
-    mainFrame:SetScript("OnHide", function(self)
-        self:SetMovable(false)
+    mainFrame:SetScript("OnHide", function(this)
+        this:SetMovable(false)
     end)
 
     return mainFrame
 end
 
----@param mainFrame Frame|UIPanelDialogTemplate
----@return FontString label
+--- @param mainFrame Frame|UIPanelDialogTemplate
+--- @return FontString label
 function addon:CreateLabel(mainFrame)
     local label = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
@@ -101,8 +104,8 @@ function addon:CreateLabel(mainFrame)
     return label
 end
 
----@param mainFrame Frame|UIPanelDialogTemplate
----@return ScrollFrame|UIPanelScrollFrameTemplate scrollFrame
+--- @param mainFrame Frame|UIPanelDialogTemplate
+--- @return ScrollFrame|UIPanelScrollFrameTemplate scrollFrame
 function addon:CreateScrollFrame(mainFrame)
     local width = settings.main.size.width - (settings.main.padding * 2) - settings.scroll.barSpacing - settings.scroll.adjustSpacing
     local height = settings.main.size.height - settings.defaultButtons.size.height - (settings.main.padding * 3) - settings.title.spacing
@@ -116,8 +119,8 @@ function addon:CreateScrollFrame(mainFrame)
     return scrollFrame
 end
 
----@param scrollFrame ScrollFrame|UIPanelScrollFrameTemplate
----@return EditBox editBox
+--- @param scrollFrame ScrollFrame|UIPanelScrollFrameTemplate
+--- @return EditBox editBox
 function addon:CreateEditBox(scrollFrame)
     local editBox = CreateFrame("EditBox", nil, scrollFrame)
 
@@ -131,9 +134,8 @@ function addon:CreateEditBox(scrollFrame)
     editBox:SetMaxLetters(255)
     editBox:SetAltArrowKeyMode(false)
 
-    editBox:SetScript("OnTextChanged", function(self)
-        TA.db.profile.trade_text = self:GetText()
-        -- print(TA.db.profile.trade_text)
+    editBox:SetScript("OnTextChanged", function(this)
+        TA.db.profile.trade_text = this:GetText()
     end)
 
     editBox:SetScript("OnEditFocusGained", function()
@@ -153,8 +155,8 @@ function addon:CreateEditBox(scrollFrame)
     return editBox
 end
 
----@param mainFrame Frame|UIPanelDialogTemplate
----@return Button|UIPanelButtonTemplate toggleButton
+--- @param mainFrame Frame|UIPanelDialogTemplate
+--- @return Button|UIPanelButtonTemplate toggleButton
 function addon:CreateToggleButton(mainFrame)
     local toggleButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
     local width = settings.defaultButtons.size.width + 35
@@ -172,9 +174,9 @@ function addon:CreateToggleButton(mainFrame)
     return toggleButton
 end
 
----@param mainFrame Frame|UIPanelDialogTemplate
----@param editBox EditBox
----@return Button|UIPanelButtonTemplate testButton
+--- @param mainFrame Frame|UIPanelDialogTemplate
+--- @param editBox EditBox
+--- @return Button|UIPanelButtonTemplate testButton
 function addon:CreateTestButton(mainFrame, editBox)
     local testButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
     local width = settings.defaultButtons.size.width
@@ -188,8 +190,8 @@ function addon:CreateTestButton(mainFrame, editBox)
         print("Your trade message: " .. editBox:GetText())
     end)
 
-    testButton:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self or UIParent, "ANCHOR_BOTTOM")
+    testButton:SetScript("OnEnter", function(this)
+        GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
         GameTooltip:SetText("Shows your trade text as print message", 1, 1, 1, 0.5)
         GameTooltip:Show()
     end)
@@ -201,39 +203,42 @@ function addon:CreateTestButton(mainFrame, editBox)
     return testButton
 end
 
+--- @param mainFrame Frame|UIPanelDialogTemplate
+--- @param relativeButton Button|UIPanelButtonTemplate
+--- @return Button|UIPanelButtonTemplate settingsButton
 function addon:CreateSettingsButton(mainFrame, relativeButton)
-    local button = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local settingsButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
     local width = settings.smallButtons.size.width
     local height = settings.smallButtons.size.height
     local padding = settings.smallButtons.padding
     local icon = "Interface\\Icons\\INV_Misc_Gear_06"
 
-    button:SetNormalTexture(icon)
-    button:SetPushedTexture(icon)
-    button:SetSize(width, height)
-    button:SetPoint("RIGHT", relativeButton, "LEFT", -padding, 0)
+    settingsButton:SetNormalTexture(icon)
+    settingsButton:SetPushedTexture(icon)
+    settingsButton:SetSize(width, height)
+    settingsButton:SetPoint("RIGHT", relativeButton, "LEFT", -padding, 0)
 
-    button:SetScript("OnClick", function()
+    settingsButton:SetScript("OnClick", function()
         InterfaceOptionsFrame_OpenToCategory(addonName)
     end)
 
-    button:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self or UIParent, "ANCHOR_BOTTOM")
+    settingsButton:SetScript("OnEnter", function(this)
+        GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
         GameTooltip:SetText("Opens settings page", 1, 1, 1, 0.5)
         GameTooltip:Show()
     end)
 
-    button:SetScript("OnLeave", function()
+    settingsButton:SetScript("OnLeave", function()
         GameTooltip:Hide()
     end)
 
-    return button
+    return settingsButton
 end
 
----@param mainFrame Frame|UIPanelDialogTemplate
----@param saveButton Button|UIPanelButtonTemplate
----@param editBox EditBox
----@return Button|UIPanelButtonTemplate firstProfessionButton, Button|UIPanelButtonTemplate secondProfessionButton
+--- @param mainFrame Frame|UIPanelDialogTemplate
+--- @param saveButton Button|UIPanelButtonTemplate
+--- @param editBox EditBox
+--- @return Button|UIPanelButtonTemplate firstProfessionButton, Button|UIPanelButtonTemplate secondProfessionButton
 function addon:CreateProfessionButtons(mainFrame, saveButton, editBox)
     local firstProfession, secondProfession = GetProfessions()
     local firstProfessionButton, secondProfessionButton
@@ -264,13 +269,13 @@ function addon:CreateProfessionButtons(mainFrame, saveButton, editBox)
     return firstProfessionButton, secondProfessionButton
 end
 
----@param name string
----@param icon string
----@param skillLineId number
----@param mainFrame Frame|UIPanelDialogTemplate
----@param editBox EditBox
----@param relativeButton Button|UIPanelButtonTemplate
----@return Button|UIPanelButtonTemplate button
+--- @param name string
+--- @param icon string
+--- @param skillLineId number
+--- @param mainFrame Frame|UIPanelDialogTemplate
+--- @param editBox EditBox
+--- @param relativeButton Button|UIPanelButtonTemplate
+--- @return Button|UIPanelButtonTemplate button
 function addon:CreateProfessionButton(name, icon, skillLineId, mainFrame, editBox, relativeButton)
     local button = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
     local width = settings.smallButtons.size.width
@@ -299,8 +304,8 @@ function addon:CreateProfessionButton(name, icon, skillLineId, mainFrame, editBo
     return button
 end
 
----@param skillLineId number?
----@return string? link
+--- @param skillLineId number?
+--- @return string? link
 function addon:GetLinkForProfession(skillLineId)
     local link
 
@@ -313,6 +318,7 @@ function addon:GetLinkForProfession(skillLineId)
     return link
 end
 
+--- @return Frame|UIPanelDialogTemplate mainFrame, EditBox editBox
 function addon:CreateUI()
     self:CreateMinimapButton()
     local mainFrame = self:CreateMainFrame()

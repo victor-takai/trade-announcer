@@ -1,7 +1,7 @@
 --- Addon name, namespace
 local addonName, addon = ...
 
----@enum Enum.ChatType
+--- @enum Enum.ChatType
 local ChatType = {
     Channel = 1,
     Say = 2,
@@ -18,17 +18,27 @@ function addon:CreateInterfaceOptions()
     local panel = CreateFrame("Frame")
     panel.name = addonName
 
-    local version = GetAddOnMetadata(addonName, "Version")
-    local title = panel:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", 16, -16)
-    title:SetText(addonName .. " |cffffff99v" .. version .. "|r")
-
-    local channelDropDown = self:CreateIntervalDropdown(panel, title, "ChannelDropdown")
-    local intervalSlider = self:CreateIntervalSlider(panel, channelDropDown, "IntervalSlider")
+    local title = self:CreateTitle(panel)
+    local channelDropDown = self:CreateIntervalDropdown(panel, title, "TA_Channel_Dropdown")
+    local intervalSlider = self:CreateIntervalSlider(panel, channelDropDown, "TA_Interval_Slider")
 
 	InterfaceOptions_AddCategory(panel)
 
     return title, channelDropDown, intervalSlider
+end
+
+function addon:CreateTitle(panel)
+    local title = panel:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 16, -16)
+
+    local version = GetAddOnMetadata(addonName, "Version")
+    if version then
+        title:SetText(addonName .. " |cffffff99v" .. version .. "|r")
+    else
+        title:SetText(addonName)
+    end
+
+    return title
 end
 
 function addon:CreateIntervalDropdown(parent, reference, name)
@@ -56,6 +66,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
         local info = UIDropDownMenu_CreateInfo()
 
         if (level or 1) == 1 then
+
             for value, text in pairs(chatTypes) do
                 info.text = text
                 info.value = value
@@ -76,7 +87,9 @@ function addon:CreateIntervalDropdown(parent, reference, name)
                 info.checked = value == TA.db.profile.chat_type
                 UIDropDownMenu_AddButton(info, level)
             end
+
         elseif menuList == "Channels" then
+
             for _, channel in pairs(joinedChannels) do
                 if not channel.isDisabled then
                     info.text = channel.name
@@ -91,6 +104,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
                     UIDropDownMenu_AddButton(info, level)
                 end
             end
+
         end
     end)
 
