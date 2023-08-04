@@ -95,11 +95,10 @@ end
 --- @return FontString label
 function addon:CreateLabel(mainFrame)
     local label = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-
     label:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", settings.title.padding.x, settings.title.padding.y)
     label:SetJustifyH("LEFT")
-    label:SetText("TradeAnnouncer")
-    label:SetTextColor(0, 1, 0, 0.75)
+    label:SetText("|cff66bbff" .. addonName .. "|r")
+    -- label:SetTextColor(0, 1, 0, 0.75)
 
     return label
 end
@@ -123,7 +122,6 @@ end
 --- @return EditBox editBox
 function addon:CreateEditBox(scrollFrame)
     local editBox = CreateFrame("EditBox", nil, scrollFrame)
-
     editBox:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
     editBox:SetPoint("TOPLEFT", scrollFrame)
     editBox:SetTextColor(1, 1, 1, 1)
@@ -162,13 +160,13 @@ function addon:CreateToggleButton(mainFrame)
     local width = settings.defaultButtons.size.width + 35
     local height = settings.defaultButtons.size.height
 
-    local text = addon:GetToggleText(TA.db.profile.is_on)
-    toggleButton:SetText("Turn " .. text)
+    local toggleText = TA.db.profile.is_on and L["TURN_OFF"]or L["TURN_ON"]
+    toggleButton:SetText(toggleText)
     toggleButton:SetSize(width, height)
     toggleButton:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", settings.main.padding, settings.main.padding)
 
-    toggleButton:SetScript("OnClick", function(self)
-        addon:ToggleMessage(self)
+    toggleButton:SetScript("OnClick", function(this)
+        addon:ToggleMessage(this)
     end)
 
     return toggleButton
@@ -178,21 +176,21 @@ end
 --- @param editBox EditBox
 --- @return Button|UIPanelButtonTemplate testButton
 function addon:CreateTestButton(mainFrame, editBox)
-    local testButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
     local width = settings.defaultButtons.size.width
     local height = settings.defaultButtons.size.height
 
-    testButton:SetText("Test")
+    local testButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    testButton:SetText(L["TEST_BUTTON"])
     testButton:SetSize(width, height)
     testButton:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -settings.main.padding + 3, settings.main.padding)
 
     testButton:SetScript("OnClick", function()
-        print("Your trade message: " .. editBox:GetText())
+        print(L["YOUR_TRADE_MESSAGE"] .. editBox:GetText())
     end)
 
     testButton:SetScript("OnEnter", function(this)
         GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Shows your trade text as print message", 1, 1, 1, 0.5)
+        GameTooltip:SetText(L["SHOWS_YOUR_TRADE_MESSAGE"], 1, 1, 1, 0.5)
         GameTooltip:Show()
     end)
 
@@ -207,12 +205,12 @@ end
 --- @param relativeButton Button|UIPanelButtonTemplate
 --- @return Button|UIPanelButtonTemplate settingsButton
 function addon:CreateSettingsButton(mainFrame, relativeButton)
-    local settingsButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
     local width = settings.smallButtons.size.width
     local height = settings.smallButtons.size.height
     local padding = settings.smallButtons.padding
     local icon = "Interface\\Icons\\INV_Misc_Gear_06"
 
+    local settingsButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
     settingsButton:SetNormalTexture(icon)
     settingsButton:SetPushedTexture(icon)
     settingsButton:SetSize(width, height)
@@ -224,7 +222,7 @@ function addon:CreateSettingsButton(mainFrame, relativeButton)
 
     settingsButton:SetScript("OnEnter", function(this)
         GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Opens settings page", 1, 1, 1, 0.5)
+        GameTooltip:SetText(L["OPENS_SETTINGS"], 1, 1, 1, 0.5)
         GameTooltip:Show()
     end)
 
@@ -291,9 +289,10 @@ function addon:CreateProfessionButton(name, icon, skillLineId, mainFrame, editBo
         editBox:Insert(self:GetLinkForProfession(skillLineId))
     end)
 
-    button:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self or UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Adds |cffFFC125[" .. name .. "]|r to trade text", 1, 1, 1, 0.5)
+    button:SetScript("OnEnter", function(this)
+        local text = string.gsub(L["ADDS_PROFESSION"], "#PROFESSION#", name)
+        GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
+        GameTooltip:SetText(text, 1, 1, 1, 0.5)
         GameTooltip:Show()
     end)
 

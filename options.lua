@@ -1,6 +1,9 @@
 --- Addon name, namespace
 local addonName, addon = ...
 
+--- Locale
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
+
 --- @enum Enum.ChatType
 local ChatType = {
     Channel = 1,
@@ -51,7 +54,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
 
     local dropDownTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     dropDownTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 0, -16)
-	dropDownTitle:SetText("Chat type")
+	dropDownTitle:SetText(L["CHAT_TYPE"])
     dropDownTitle:SetJustifyH("LEFT")
 	dropDownTitle:SetWidth(200)
 
@@ -59,7 +62,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
     dropDown:SetPoint("TOPLEFT", dropDownTitle, "BOTTOMLEFT", -18, -5)
 
     UIDropDownMenu_SetWidth(dropDown, 200)
-    UIDropDownMenu_SetText(dropDown, "Set the chat type")
+    UIDropDownMenu_SetText(dropDown, L["SET_CHAT_TYPE"])
     UIDropDownMenu_JustifyText(dropDown, "LEFT")
 
     UIDropDownMenu_Initialize(dropDown, function(_, level, menuList)
@@ -137,7 +140,7 @@ end
 function addon:CreateIntervalSlider(parent, reference, name)
     local sliderTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     sliderTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 18, -16)
-	sliderTitle:SetText("Interval (seconds)")
+	sliderTitle:SetText(L["INTERVAL"])
 	sliderTitle:SetJustifyH("LEFT")
 	sliderTitle:SetWidth(200)
 

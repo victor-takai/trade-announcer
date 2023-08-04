@@ -6,6 +6,9 @@
 ## RequiredDeps: MessageQueue
 
 embeds.xml
+
+Locales\locales.xml
+
 core.lua
 builder.lua
 options.lua

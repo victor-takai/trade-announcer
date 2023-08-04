@@ -79,11 +79,6 @@ function addon:SetupOnUpdate()
 	updateFrame:SetScript("OnUpdate", OnUpdate)
 end
 
--- Generates colored text based on boolean
-function addon:GetToggleText(isOn)
-    return isOn and "|cffbf2626OFF|r" or "|cff40c040ON|r"
-end
-
 --- Gets all joined channels
 function addon:GetJoinedChannels()
     local channels = { }
@@ -113,8 +108,8 @@ function addon:CreateMinimapButton()
         end,
         OnTooltipShow = function(tooltip)
             tooltip:AddLine(addonName)
-            tooltip:AddLine("|cff6699ffLeft-click|r to open input box.", 1, 1, 1)
-            tooltip:AddLine("|cff6699ffRight-click|r to show options.", 1, 1, 1)
+            tooltip:AddLine(L["MINIMAP_LEFT_CLICK"] , 1, 1, 1)
+            tooltip:AddLine(L["MINIMAP_RIGHT_CLICK"] , 1, 1, 1)
         end,
     })
 
@@ -125,16 +120,17 @@ end
 function addon:ToggleMessage(toggleButton)
     if TA.db.profile.chat_type or TA.db.profile.channel_type then
         TA.db.profile.is_on = not TA.db.profile.is_on
-        local text = self:GetToggleText(TA.db.profile.is_on)
-        local inversedText = self:GetToggleText(not TA.db.profile.is_on)
-        toggleButton:SetText("Turn " .. text)
-        local message = "Your auto trade message was turned " .. inversedText
+
+        local toggleText = TA.db.profile.is_on and L["TURN_OFF"]or L["TURN_ON"]
+        toggleButton:SetText(toggleText)
+
+        local message = TA.db.profile.is_on and L["MESSAGE_TURNED_ON"] or L["MESSAGE_TURNED_OFF"]
         if TA.db.profile.is_on then
-            message = message .. " and will be displayed in " .. TA.db.profile.interval .. " seconds."
+            message = message .. string.gsub(L["MESSAGE_WILL_BE_DISPLAYED"], "#INTERVAL#", TA.db.profile.interval)
         end
         print(message)
     else
-        print("Please set a chat/channel first in the addon's settings.")
+        print(L["SET_CHAT_CHANNEL_FIRST"])
     end
 end
 
