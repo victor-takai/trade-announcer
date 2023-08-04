@@ -98,7 +98,7 @@ function addon:CreateMinimapButton()
     local ldb = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
         type = "data source",
         text = addonName,
-        icon = "Interface\\Icons\\INV_Misc_QuestionMark",
+        icon = "Interface\\AddOns\\TradeAnnouncer\\icon",
         OnClick = function(_, button)
             if button == "LeftButton" then
                 self:ToggleUI()
