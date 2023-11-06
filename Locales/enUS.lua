@@ -3,6 +3,9 @@ local L = LibStub("AceLocale-3.0"):NewLocale(addonName, "enUS", true)
 if not L then return end
 
 local addonNamePrint = "|cff66bbff[" .. addonName .. "]|r "
+local version = GetAddOnMetadata(addonName, "Version")
+
+L["ADDON_LOADED"] = "|cff66bbff" .. addonName .. " " .. version .. "|r" .. " loaded."
 
 L["MINIMAP_LEFT_CLICK"] = "|cff6699ffLeft-click|r to open the addon."
 L["MINIMAP_RIGHT_CLICK"] = "|cff6699ffRight-click|r to show settings."

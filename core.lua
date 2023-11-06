@@ -9,6 +9,7 @@ local mainFrame
 local editBox
 local updateFrame
 local isEditBoxOnFocus = false
+local hasLoaded = false
 
 --- AceAddon reference
 TA = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceHook-3.0")
@@ -37,8 +38,7 @@ function TA:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("TradeAnnouncerDB", defaults)
     self:RegisterChatCommand("ta", "SlashCommand")
 
-    addon:SetupUI()
-    addon:SetupOnUpdate()
+    addon:SetupUpdateFrame()
 end
 
 function TA:OnEnable()
@@ -68,15 +68,17 @@ function addon:SetupUI()
 end
 
 --- Creates invisible frame for tracking time
-function addon:SetupOnUpdate()
+function addon:SetupUpdateFrame()
     updateFrame = CreateFrame("Frame")
     updateFrame:SetFrameStrata("HIGH")
     updateFrame:SetToplevel(true)
     updateFrame:SetMovable(false)
     updateFrame:EnableMouse(false)
 
+    updateFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     updateFrame.timeSinceLastUpdate = 0
 	updateFrame:SetScript("OnUpdate", OnUpdate)
+    updateFrame:SetScript("OnEvent", OnEvent)
 end
 
 --- Gets all joined channels
@@ -108,8 +110,8 @@ function addon:CreateMinimapButton()
         end,
         OnTooltipShow = function(tooltip)
             tooltip:AddLine(addonName)
-            tooltip:AddLine(L["MINIMAP_LEFT_CLICK"] , 1, 1, 1)
-            tooltip:AddLine(L["MINIMAP_RIGHT_CLICK"] , 1, 1, 1)
+            tooltip:AddLine(L["MINIMAP_LEFT_CLICK"], 1, 1, 1)
+            tooltip:AddLine(L["MINIMAP_RIGHT_CLICK"], 1, 1, 1)
         end,
     })
 
@@ -210,4 +212,13 @@ function OnUpdate(self, elapsed)
         end
 		self.timeSinceLastUpdate = 0
 	end
+end
+
+function OnEvent(self, event, ...)
+    if (not hasLoaded and event == "PLAYER_ENTERING_WORLD") then
+        print(L["ADDON_LOADED"])
+        hasLoaded = true
+        updateFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+        addon:SetupUI()
+    end
 end

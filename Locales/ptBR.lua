@@ -3,6 +3,9 @@ local L = LibStub("AceLocale-3.0"):NewLocale(addonName, "ptBR")
 if not L then return end
 
 local addonNamePrint = "|cff66bbff[" .. addonName .. "]|r "
+local version = GetAddOnMetadata(addonName, "Version")
+
+L["ADDON_LOADED"] = "|cff66bbff" .. addonName .. " " .. version .. "|r" .. " carregado."
 
 L["MINIMAP_LEFT_CLICK"] = "|cff6699ffBotão-esquerdo|r para abrir o addon."
 L["MINIMAP_RIGHT_CLICK"] = "|cff6699ffBotão-direito|r para exibir as configurações."

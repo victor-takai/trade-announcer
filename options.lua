@@ -36,7 +36,7 @@ function addon:CreateTitle(panel)
 
     local version = GetAddOnMetadata(addonName, "Version")
     if version then
-        title:SetText(addonName .. " |cffffff99v" .. version .. "|r")
+        title:SetText(addonName .. " |cffffff99" .. version .. "|r")
     else
         title:SetText(addonName)
     end

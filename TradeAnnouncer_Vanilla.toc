@@ -1,6 +1,6 @@
-## Interface: 11403
+## Interface: 11404
 ## Title: TradeAnnouncer
-## Version: 1.0
+## Version: 1.1
 ## Author: Kalivos
 ## SavedVariables: TradeAnnouncerDB
 ## RequiredDeps: MessageQueue
