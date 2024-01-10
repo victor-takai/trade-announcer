@@ -3,7 +3,7 @@ local L = LibStub("AceLocale-3.0"):NewLocale(addonName, "ptBR")
 if not L then return end
 
 local addonNamePrint = "|cff66bbff[" .. addonName .. "]|r "
-local version = GetAddOnMetadata(addonName, "Version")
+local version = C_AddOns.GetAddOnMetadata(addonName, "Version")
 
 L["ADDON_LOADED"] = "|cff66bbff" .. addonName .. " " .. version .. "|r" .. " carregado."
 

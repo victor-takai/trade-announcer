@@ -39,7 +39,7 @@ local settings = {
             width = 20,
             height = 20,
         },
-        padding = 5
+        padding = 5,
     },
 }
 
@@ -95,7 +95,7 @@ end
 --- @return FontString label
 function addon:CreateLabel(mainFrame)
     local label = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    label:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", settings.title.padding.x, settings.title.padding.y)
+    label:SetPoint("TOPLEFT", mainFrame:GetName(), "TOPLEFT", settings.title.padding.x, settings.title.padding.y)
     label:SetJustifyH("LEFT")
     label:SetText("|cff66bbff" .. addonName .. "|r")
     -- label:SetTextColor(0, 1, 0, 0.75)
@@ -113,7 +113,7 @@ function addon:CreateScrollFrame(mainFrame)
 
     local scrollFrame = CreateFrame("ScrollFrame", nil, mainFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetSize(width, height)
-    scrollFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", pointX, pointY)
+    scrollFrame:SetPoint("TOPLEFT", mainFrame:GetName(), "TOPLEFT", pointX, pointY)
 
     return scrollFrame
 end
@@ -123,7 +123,7 @@ end
 function addon:CreateEditBox(scrollFrame)
     local editBox = CreateFrame("EditBox", nil, scrollFrame)
     editBox:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
-    editBox:SetPoint("TOPLEFT", scrollFrame)
+    editBox:SetPoint("TOPLEFT", scrollFrame:GetName())
     editBox:SetTextColor(1, 1, 1, 1)
     editBox:SetMultiLine(true)
     editBox:SetHyperlinksEnabled()
@@ -160,10 +160,10 @@ function addon:CreateToggleButton(mainFrame)
     local width = settings.defaultButtons.size.width + 35
     local height = settings.defaultButtons.size.height
 
-    local toggleText = TA.db.profile.is_on and L["TURN_OFF"]or L["TURN_ON"]
-    toggleButton:SetText(toggleText)
+    local toggleText = TA.db.profile.is_on and L["TURN_OFF"] or L["TURN_ON"]
+    toggleButton:SetText(tostring(toggleText))
     toggleButton:SetSize(width, height)
-    toggleButton:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", settings.main.padding, settings.main.padding)
+    toggleButton:SetPoint("BOTTOMLEFT", mainFrame:GetName(), "BOTTOMLEFT", settings.main.padding, settings.main.padding)
 
     toggleButton:SetScript("OnClick", function(this)
         addon:ToggleMessage(this)
@@ -180,9 +180,10 @@ function addon:CreateTestButton(mainFrame, editBox)
     local height = settings.defaultButtons.size.height
 
     local testButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    testButton:SetText(L["TEST_BUTTON"])
+    local localizedText = tostring(L["TEST_BUTTON"])
+    testButton:SetText(localizedText)
     testButton:SetSize(width, height)
-    testButton:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -settings.main.padding + 3, settings.main.padding)
+    testButton:SetPoint("BOTTOMRIGHT", mainFrame:GetName(), "BOTTOMRIGHT", -settings.main.padding + 3, settings.main.padding)
 
     testButton:SetScript("OnClick", function()
         print(L["YOUR_TRADE_MESSAGE"] .. editBox:GetText())
@@ -214,7 +215,7 @@ function addon:CreateSettingsButton(mainFrame, relativeButton)
     settingsButton:SetNormalTexture(icon)
     settingsButton:SetPushedTexture(icon)
     settingsButton:SetSize(width, height)
-    settingsButton:SetPoint("RIGHT", relativeButton, "LEFT", -padding, 0)
+    settingsButton:SetPoint("RIGHT", relativeButton:GetName(), "LEFT", -padding, 0)
 
     settingsButton:SetScript("OnClick", function()
         InterfaceOptionsFrame_OpenToCategory(addonName)
@@ -283,14 +284,18 @@ function addon:CreateProfessionButton(name, icon, skillLineId, mainFrame, editBo
     button:SetNormalTexture(icon)
     button:SetPushedTexture(icon)
     button:SetSize(width, height)
-    button:SetPoint("RIGHT", relativeButton, "RIGHT", width + padding, 0)
+    button:SetPoint("RIGHT", relativeButton:GetName(), "RIGHT", width + padding, 0)
 
     button:SetScript("OnClick", function()
-        editBox:Insert(self:GetLinkForProfession(skillLineId))
+        local professionLink = self:GetLinkForProfession(skillLineId)
+        if professionLink then
+            editBox:Insert(professionLink)
+        end
     end)
 
     button:SetScript("OnEnter", function(this)
-        local text = string.gsub(L["ADDS_PROFESSION"], "#PROFESSION#", name)
+        local localizedMessage = tostring(L["ADDS_PROFESSION"])
+        local text = string.gsub(localizedMessage, "#PROFESSION#", name)
         GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
         GameTooltip:SetText(text, 1, 1, 1, 0.5)
         GameTooltip:Show()

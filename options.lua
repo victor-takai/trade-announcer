@@ -18,6 +18,7 @@ local ChatType = {
 }
 
 function addon:CreateInterfaceOptions()
+    ---@class Frame
     local panel = CreateFrame("Frame")
     panel.name = addonName
 
@@ -34,7 +35,7 @@ function addon:CreateTitle(panel)
     local title = panel:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 16, -16)
 
-    local version = GetAddOnMetadata(addonName, "Version")
+    local version = C_AddOns.GetAddOnMetadata(addonName, "Version")
     if version then
         title:SetText(addonName .. " |cffffff99" .. version .. "|r")
     else
