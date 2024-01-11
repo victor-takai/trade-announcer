@@ -23,8 +23,8 @@ L["TEST_BUTTON"] = "Testar"
 L["YOUR_TRADE_MESSAGE"] = addonNamePrint .. "Sua mensagem: \n"
 L["SHOWS_YOUR_TRADE_MESSAGE"] = "Exibe sua mensagem automática usando o comando print"
 
-L["OPENS_SETTINGS"] = "Abre a página de configurações"
-L["ADDS_PROFESSION"] = "Adiciona |cffFFC125[#PROFESSION#]|r à mensagem"
+L["OPENS_SETTINGS"] = "Abrir página de |cff6699ffconfigurações|r"
+L["ADDS_PROFESSION"] = "Adicionar |cffFFC125[#PROFESSION#]|r à mensagem"
 
 L["CHAT_TYPE"] = "Tipo do chat"
 L["SET_CHAT_TYPE"] = "Selecione o chat"

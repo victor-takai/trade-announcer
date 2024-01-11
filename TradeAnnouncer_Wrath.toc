@@ -9,6 +9,6 @@ embeds.xml
 
 Locales\locales.xml
 
-core.lua
-builder.lua
-options.lua
+Files\core.lua
+Files\ui_builder.lua
+Files\settings_builder.lua

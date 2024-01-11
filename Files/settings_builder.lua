@@ -32,7 +32,7 @@ function addon:CreateInterfaceOptions()
 end
 
 function addon:CreateTitle(panel)
-    local title = panel:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
+    local title = panel:CreateFontString("TA_SettingsTitle", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 16, -16)
 
     local version = C_AddOns.GetAddOnMetadata(addonName, "Version")
@@ -53,7 +53,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
 
     local joinedChannels = self:GetJoinedChannels()
 
-    local dropDownTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    local dropDownTitle = parent:CreateFontString("TA_SettingsDropdownTitle", "ARTWORK", "GameFontNormalSmall")
     dropDownTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 0, -16)
 	dropDownTitle:SetText(L["CHAT_TYPE"])
     dropDownTitle:SetJustifyH("LEFT")
@@ -139,13 +139,13 @@ function addon:CreateIntervalDropdown(parent, reference, name)
 end
 
 function addon:CreateIntervalSlider(parent, reference, name)
-    local sliderTitle = parent:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    local sliderTitle = parent:CreateFontString("TA_SettingsSliderTitle", "ARTWORK", "GameFontNormalSmall")
     sliderTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 18, -16)
 	sliderTitle:SetText(L["INTERVAL"])
 	sliderTitle:SetJustifyH("LEFT")
 	sliderTitle:SetWidth(200)
 
-    local sliderValueText = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    local sliderValueText = parent:CreateFontString("TA_SettingsSliderText", "ARTWORK", "GameFontHighlightSmall")
 
     local slider = CreateFrame("Slider", name , parent, "OptionsSliderTemplate")
     slider:SetPoint("TOPLEFT", sliderTitle, "BOTTOMLEFT", 0, -5)

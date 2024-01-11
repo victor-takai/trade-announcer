@@ -45,7 +45,7 @@ local settings = {
 
 --- @return Frame|UIPanelDialogTemplate mainFrame
 function addon:CreateMainFrame()
-    local mainFrame = CreateFrame("Frame", nil, UIParent, "UIPanelDialogTemplate")
+    local mainFrame = CreateFrame("Frame", "TA_MainFrame", UIParent, "UIPanelDialogTemplate")
     local width = settings.main.size.width
     local height = settings.main.size.height
 
@@ -94,11 +94,10 @@ end
 --- @param mainFrame Frame|UIPanelDialogTemplate
 --- @return FontString label
 function addon:CreateLabel(mainFrame)
-    local label = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local label = mainFrame:CreateFontString("TA_Label", "OVERLAY", "GameFontNormal")
     label:SetPoint("TOPLEFT", mainFrame:GetName(), "TOPLEFT", settings.title.padding.x, settings.title.padding.y)
     label:SetJustifyH("LEFT")
     label:SetText("|cff66bbff" .. addonName .. "|r")
-    -- label:SetTextColor(0, 1, 0, 0.75)
 
     return label
 end
@@ -111,7 +110,7 @@ function addon:CreateScrollFrame(mainFrame)
     local pointX = settings.main.padding + settings.scroll.adjustSpacing
     local pointY = -(settings.main.padding + settings.title.spacing)
 
-    local scrollFrame = CreateFrame("ScrollFrame", nil, mainFrame, "UIPanelScrollFrameTemplate")
+    local scrollFrame = CreateFrame("ScrollFrame", "TA_Scroll", mainFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetSize(width, height)
     scrollFrame:SetPoint("TOPLEFT", mainFrame:GetName(), "TOPLEFT", pointX, pointY)
 
@@ -121,7 +120,7 @@ end
 --- @param scrollFrame ScrollFrame|UIPanelScrollFrameTemplate
 --- @return EditBox editBox
 function addon:CreateEditBox(scrollFrame)
-    local editBox = CreateFrame("EditBox", nil, scrollFrame)
+    local editBox = CreateFrame("EditBox", "TA_EditBox", scrollFrame)
     editBox:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
     editBox:SetPoint("TOPLEFT", scrollFrame:GetName())
     editBox:SetTextColor(1, 1, 1, 1)
@@ -156,7 +155,7 @@ end
 --- @param mainFrame Frame|UIPanelDialogTemplate
 --- @return Button|UIPanelButtonTemplate toggleButton
 function addon:CreateToggleButton(mainFrame)
-    local toggleButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local toggleButton = CreateFrame("Button", "TA_ToggleButton", mainFrame, "UIPanelButtonTemplate")
     local width = settings.defaultButtons.size.width + 35
     local height = settings.defaultButtons.size.height
 
@@ -179,7 +178,7 @@ function addon:CreateTestButton(mainFrame, editBox)
     local width = settings.defaultButtons.size.width
     local height = settings.defaultButtons.size.height
 
-    local testButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local testButton = CreateFrame("Button", "TA_TestButton", mainFrame, "UIPanelButtonTemplate")
     local localizedText = tostring(L["TEST_BUTTON"])
     testButton:SetText(localizedText)
     testButton:SetSize(width, height)
@@ -211,7 +210,7 @@ function addon:CreateSettingsButton(mainFrame, relativeButton)
     local padding = settings.smallButtons.padding
     local icon = "Interface\\Icons\\INV_Misc_Gear_06"
 
-    local settingsButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+    local settingsButton = CreateFrame("Button", "TA_SettingsButton", mainFrame, "UIPanelButtonTemplate")
     settingsButton:SetNormalTexture(icon)
     settingsButton:SetPushedTexture(icon)
     settingsButton:SetSize(width, height)
@@ -245,6 +244,7 @@ function addon:CreateProfessionButtons(mainFrame, saveButton, editBox)
     if firstProfession then
         local name, icon, _, _, _, _, skillLine = GetProfessionInfo(firstProfession)
         firstProfessionButton = self:CreateProfessionButton(
+            "TA_FirstProfessionButton",
             name,
             icon,
             skillLine,
@@ -256,6 +256,7 @@ function addon:CreateProfessionButtons(mainFrame, saveButton, editBox)
     if secondProfession then
         local name, icon, _, _, _, _, skillLine = GetProfessionInfo(secondProfession)
         secondProfessionButton = self:CreateProfessionButton(
+            "TA_SecondProfessionButton",
             name,
             icon,
             skillLine,
@@ -268,6 +269,7 @@ function addon:CreateProfessionButtons(mainFrame, saveButton, editBox)
     return firstProfessionButton, secondProfessionButton
 end
 
+--- @param buttonName string
 --- @param name string
 --- @param icon string
 --- @param skillLineId number
@@ -275,8 +277,8 @@ end
 --- @param editBox EditBox
 --- @param relativeButton Button|UIPanelButtonTemplate
 --- @return Button|UIPanelButtonTemplate button
-function addon:CreateProfessionButton(name, icon, skillLineId, mainFrame, editBox, relativeButton)
-    local button = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+function addon:CreateProfessionButton(buttonName, name, icon, skillLineId, mainFrame, editBox, relativeButton)
+    local button = CreateFrame("Button", buttonName, mainFrame, "UIPanelButtonTemplate")
     local width = settings.smallButtons.size.width
     local height = settings.smallButtons.size.height
     local padding = settings.smallButtons.padding
@@ -324,7 +326,6 @@ end
 
 --- @return Frame|UIPanelDialogTemplate mainFrame, EditBox editBox
 function addon:CreateUI()
-    self:CreateMinimapButton()
     local mainFrame = self:CreateMainFrame()
     self:CreateLabel(mainFrame)
     local scrollFrame = self:CreateScrollFrame(mainFrame)

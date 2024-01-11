@@ -65,6 +65,7 @@ end
 --- Creates the UI
 function addon:SetupUI()
     mainFrame, editBox = self:CreateUI()
+    self:CreateMinimapButton()
 end
 
 --- Creates interface options
@@ -111,7 +112,7 @@ function addon:CreateMinimapButton()
     local tradeAnnouncerLDB = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
         type = "data source",
         text = addonName,
-        icon = "Interface\\AddOns\\TradeAnnouncer\\icon",
+        icon = "Interface\\AddOns\\TradeAnnouncer\\Resources\\icon",
         OnClick = function(_, button)
             if button == "LeftButton" then
                 self:ToggleUI()
