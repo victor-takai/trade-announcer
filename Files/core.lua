@@ -1,20 +1,23 @@
---- Addon name, namespace
-local addonName, addon = ...
+---@diagnostic disable: undefined-global, inject-field, duplicate-set-field, undefined-field, missing-fields, param-type-mismatch
 
---- Locale
+--- Addon name, namespace
+local addonName, addonTable = ...
+
+--- AceAddon local variable
+local aceAddon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceHook-3.0")
+addonTable.aceAddon = aceAddon
+
+--- AceLocale local variable
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
---- Variables
+--- Local variables
 local mainFrame
 local editBox
 local updateFrame
+
 local isEditBoxOnFocus = false
 local hasLoadedUI = false
 local hasLoadedOptions = false
-
---- AceAddon reference
----@class AceAddon
-TA = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceHook-3.0")
 
 --- Defaults for AceDB
 local defaults = {
@@ -36,15 +39,18 @@ local defaults = {
 
 ----------------------------------------------------------------------------------------
 
-function TA:OnInitialize()
+function aceAddon:OnInitialize()
+    --- Setup AceDB
     self.db = LibStub("AceDB-3.0"):New("TradeAnnouncerDB", defaults)
+
     --- Register slash commands
     self:RegisterChatCommand("ta", "SlashCommand")
 
-    addon:SetupUpdateFrame()
+    --- Setup invisible frame
+    addonTable:SetupUpdateFrame()
 end
 
-function TA:OnEnable()
+function aceAddon:OnEnable()
     self:SecureHook("HandleModifiedItemClick", function(link)
         if mainFrame:IsShown() and isEditBoxOnFocus then
             editBox:Insert(link)
@@ -52,49 +58,99 @@ function TA:OnEnable()
     end)
 end
 
-function TA:OnDisable()
+function aceAddon:OnDisable()
     self:Unhook("HandleModifiedItemClick")
 end
 
-function TA:SlashCommand()
-    addon:ToggleUI()
+function aceAddon:SlashCommand()
+    addonTable:ToggleUI()
 end
 
 ----------------------------------------------------------------------------------------
 
 --- Creates the UI
-function addon:SetupUI()
+function addonTable:SetupUI()
     mainFrame, editBox = self:CreateUI()
     self:CreateMinimapButton()
 end
 
 --- Creates interface options
-function addon:SetupInterfaceOption()
+function addonTable:SetupInterfaceOption()
     self:CreateInterfaceOptions()
 end
 
 --- Creates invisible frame for tracking time
-function addon:SetupUpdateFrame()
-    ---@class Frame
+function addonTable:SetupUpdateFrame()
     updateFrame = CreateFrame("Frame")
     updateFrame:SetFrameStrata("HIGH")
     updateFrame:SetToplevel(true)
     updateFrame:SetMovable(false)
     updateFrame:EnableMouse(false)
 
-    --- Register events
-    updateFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    updateFrame:SetScript("OnEvent", OnEvent)
-
-    --- Register updates
+    --- Inject fields
     updateFrame.timeSinceLastUpdate = 0
     updateFrame.channelsCheckTotalElapsed = 0
     updateFrame.channelsCheckInterval = 1
-	updateFrame:SetScript("OnUpdate", OnUpdate)
+
+    --- Register events
+    updateFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    updateFrame:SetScript("OnEvent", UdateFrameOnEvent)
+
+    --- Register updates
+	updateFrame:SetScript("OnUpdate", UpdateFrameOnUpdate)
 end
 
+----------------------------------------------------------------------------------------
+
+--- Callback function for onEvent used by updateFrame
+function UdateFrameOnEvent(self, event, ...)
+    if (not hasLoadedUI and event == "PLAYER_ENTERING_WORLD") then
+        print(L["ADDON_LOADED"])
+        hasLoadedUI = true
+        updateFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+        addonTable:SetupUI()
+    end
+end
+
+--- Callback function for onUpdate used by updateFrame
+function UpdateFrameOnUpdate(self, elapsed)
+    self.channelsCheckTotalElapsed = self.channelsCheckTotalElapsed + elapsed
+    if not hasLoadedOptions and self.channelsCheckTotalElapsed >= self.channelsCheckInterval then
+        self.channelsCheckTotalElapsed = 0
+
+        local channels = addonTable:GetJoinedChannels()
+        local areChannelsEmpty = true
+        for _, _ in pairs(channels) do
+            areChannelsEmpty = false
+        end
+
+        if (not areChannelsEmpty) then
+            addonTable:SetupInterfaceOption()
+            hasLoadedOptions = true
+        end
+    end
+
+	if not aceAddon.db.profile.is_on or MessageQueue.GetNumPendingMessages() > 0 then
+        return
+    end
+
+	self.timeSinceLastUpdate = self.timeSinceLastUpdate + elapsed
+    local message = aceAddon.db.profile.trade_text
+
+	if self.timeSinceLastUpdate >= aceAddon.db.profile.interval then
+        if message ~= "" then
+            local chatType = addonTable:GetChatName(aceAddon.db.profile.chat_type)
+            local target = aceAddon.db.profile.channel_type
+            MessageQueue.SendChatMessage(message, chatType, nil, target)
+        end
+		self.timeSinceLastUpdate = 0
+	end
+end
+
+----------------------------------------------------------------------------------------
+
 --- Gets all joined channels
-function addon:GetJoinedChannels()
+function addonTable:GetJoinedChannels()
     local channels = { }
     local channelList = { GetChannelList() }
     for i = 1, #channelList, 3 do
@@ -108,7 +164,7 @@ function addon:GetJoinedChannels()
 end
 
 --- Creates the minimap button
-function addon:CreateMinimapButton()
+function addonTable:CreateMinimapButton()
     local tradeAnnouncerLDB = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
         type = "data source",
         text = addonName,
@@ -128,21 +184,21 @@ function addon:CreateMinimapButton()
     })
 
     local icon = LibStub("LibDBIcon-1.0")
-    icon:Register(addonName, tradeAnnouncerLDB, TA.db.profile.minimap)
+    icon:Register(addonName, tradeAnnouncerLDB, aceAddon.db.profile.minimap)
 end
 
 --- Toggles auto message
-function addon:ToggleMessage(toggleButton)
-    if TA.db.profile.chat_type or TA.db.profile.channel_type then
-        TA.db.profile.is_on = not TA.db.profile.is_on
+function addonTable:ToggleMessage(toggleButton)
+    if aceAddon.db.profile.chat_type or aceAddon.db.profile.channel_type then
+        aceAddon.db.profile.is_on = not aceAddon.db.profile.is_on
 
-        local toggleText = TA.db.profile.is_on and L["TURN_OFF"]or L["TURN_ON"]
+        local toggleText = aceAddon.db.profile.is_on and L["TURN_OFF"]or L["TURN_ON"]
         toggleButton:SetText(toggleText)
 
-        local message = TA.db.profile.is_on and L["MESSAGE_TURNED_ON"] or L["MESSAGE_TURNED_OFF"]
-        if TA.db.profile.is_on then
+        local message = aceAddon.db.profile.is_on and L["MESSAGE_TURNED_ON"] or L["MESSAGE_TURNED_OFF"]
+        if aceAddon.db.profile.is_on then
             local localizedMessage = tostring(L["MESSAGE_WILL_BE_DISPLAYED"])
-            message = message .. string.gsub(localizedMessage, "#INTERVAL#", TA.db.profile.interval)
+            message = message .. string.gsub(localizedMessage, "#INTERVAL#", aceAddon.db.profile.interval)
         end
         print(message)
     else
@@ -151,7 +207,7 @@ function addon:ToggleMessage(toggleButton)
 end
 
 --- Toggles the UI
-function addon:ToggleUI()
+function addonTable:ToggleUI()
     if mainFrame:IsShown() then
         self:HideUI()
     else
@@ -160,8 +216,8 @@ function addon:ToggleUI()
 end
 
 --- Hides the UI
-function addon:ShowUI()
-    local text = TA.db.profile.trade_text
+function addonTable:ShowUI()
+    local text = aceAddon.db.profile.trade_text
     if text ~= "" and editBox:GetText() == "" then
         editBox:SetText(text)
         editBox:SetCursorPosition(editBox:GetText():len())
@@ -171,23 +227,22 @@ function addon:ShowUI()
 end
 
 --- Shows the UI
-function addon:HideUI()
+function addonTable:HideUI()
     mainFrame:Hide()
 end
 
 --- Trigered when EditBox gains focus
-function addon:OnFocusGained()
+function addonTable:OnFocusGained()
     isEditBoxOnFocus = true
 end
 
 --- Trigered when EditBox loses focus
-function addon:OnFocusLost()
+function addonTable:OnFocusLost()
     isEditBoxOnFocus = false
 end
 
-----------------------------------------------------------------------------------------
-
-function addon:GetChatName(chatType)
+--- Get chat name based on type
+function addonTable:GetChatName(chatType)
     if chatType == 1 then
 		return "CHANNEL"
 	elseif chatType == 2 then
@@ -208,47 +263,4 @@ function addon:GetChatName(chatType)
 		return "OFFICER"
     end
 	return nil
-end
-
-function OnUpdate(self, elapsed)
-    self.channelsCheckTotalElapsed = self.channelsCheckTotalElapsed + elapsed
-    if not hasLoadedOptions and self.channelsCheckTotalElapsed >= self.channelsCheckInterval then
-        self.channelsCheckTotalElapsed = 0
-
-        local channels = addon:GetJoinedChannels()
-        local areChannelsEmpty = true
-        for _, _ in pairs(channels) do
-            areChannelsEmpty = false
-        end
-
-        if (not areChannelsEmpty) then
-            addon:SetupInterfaceOption()
-            hasLoadedOptions = true
-        end
-    end
-
-	if not TA.db.profile.is_on or MessageQueue.GetNumPendingMessages() > 0 then
-        return
-    end
-
-	self.timeSinceLastUpdate = self.timeSinceLastUpdate + elapsed
-    local message = TA.db.profile.trade_text
-
-	if self.timeSinceLastUpdate >= TA.db.profile.interval then
-        if message ~= "" then
-            local chatType = addon:GetChatName(TA.db.profile.chat_type)
-            local target = TA.db.profile.channel_type
-            MessageQueue.SendChatMessage(message, chatType, nil, target)
-        end
-		self.timeSinceLastUpdate = 0
-	end
-end
-
-function OnEvent(self, event, ...)
-    if (not hasLoadedUI and event == "PLAYER_ENTERING_WORLD") then
-        print(L["ADDON_LOADED"])
-        hasLoadedUI = true
-        updateFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
-        addon:SetupUI()
-    end
 end

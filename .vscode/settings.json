@@ -374,11 +374,4 @@
         "PET",
         "REPUTATION_PROGRESS_FORMAT"
     ],
-    "Lua.diagnostics.disable": [
-        "duplicate-set-field",
-        "missing-fields",
-        "undefined-field",
-        "undefined-doc-name",
-        "undefined-global"
-    ]
 }

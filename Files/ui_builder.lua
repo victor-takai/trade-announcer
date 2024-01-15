@@ -1,10 +1,15 @@
---- Addon name, namespace
-local addonName, addon = ...
+---@diagnostic disable: return-type-mismatch, undefined-field
 
---- Locale
+--- Addon name, namespace
+local addonName, addonTable = ...
+
+--- AceAddon local variable
+local aceAddon = addonTable.aceAddon
+
+--- AceLocale local variable
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
---- Settings
+--- Settings table
 local settings = {
     main = {
         size = {
@@ -43,16 +48,16 @@ local settings = {
     },
 }
 
---- @return Frame|UIPanelDialogTemplate mainFrame
-function addon:CreateMainFrame()
+--- @return Frame mainFrame
+function addonTable:CreateMainFrame()
     local mainFrame = CreateFrame("Frame", "TA_MainFrame", UIParent, "UIPanelDialogTemplate")
     local width = settings.main.size.width
     local height = settings.main.size.height
 
     mainFrame:SetSize(width, height)
 
-    if TA.db.profile.position.x and TA.db.profile.position.y then
-        mainFrame:SetPoint("CENTER", UIParent, "CENTER", TA.db.profile.position.x, TA.db.profile.position.y)
+    if aceAddon.db.profile.position.x and aceAddon.db.profile.position.y then
+        mainFrame:SetPoint("CENTER", UIParent, "CENTER", aceAddon.db.profile.position.x, aceAddon.db.profile.position.y)
     else
         mainFrame:SetPoint("CENTER", UIParent)
     end
@@ -75,8 +80,8 @@ function addon:CreateMainFrame()
             local x, y = this:GetCenter()
             local px, py = this:GetParent():GetCenter()
             local cx, cy = x-px, y-py
-            TA.db.profile.position.x = cx
-            TA.db.profile.position.y = cy
+            aceAddon.db.profile.position.x = cx
+            aceAddon.db.profile.position.y = cy
         end
     end)
 
@@ -91,20 +96,19 @@ function addon:CreateMainFrame()
     return mainFrame
 end
 
---- @param mainFrame Frame|UIPanelDialogTemplate
---- @return FontString label
-function addon:CreateLabel(mainFrame)
-    local label = mainFrame:CreateFontString("TA_Label", "OVERLAY", "GameFontNormal")
-    label:SetPoint("TOPLEFT", mainFrame:GetName(), "TOPLEFT", settings.title.padding.x, settings.title.padding.y)
-    label:SetJustifyH("LEFT")
-    label:SetText("|cff66bbff" .. addonName .. "|r")
+--- @param mainFrame Frame
+--- @return FontString title
+function addonTable:CreateLabel(mainFrame)
+    local title = mainFrame.Title
+    title:SetText("|cff66bbff" .. addonName .. "|r")
+    title:SetJustifyH("LEFT")
 
-    return label
+    return title
 end
 
---- @param mainFrame Frame|UIPanelDialogTemplate
---- @return ScrollFrame|UIPanelScrollFrameTemplate scrollFrame
-function addon:CreateScrollFrame(mainFrame)
+--- @param mainFrame Frame
+--- @return ScrollFrame scrollFrame
+function addonTable:CreateScrollFrame(mainFrame)
     local width = settings.main.size.width - (settings.main.padding * 2) - settings.scroll.barSpacing - settings.scroll.adjustSpacing
     local height = settings.main.size.height - settings.defaultButtons.size.height - (settings.main.padding * 3) - settings.title.spacing
     local pointX = settings.main.padding + settings.scroll.adjustSpacing
@@ -117,9 +121,9 @@ function addon:CreateScrollFrame(mainFrame)
     return scrollFrame
 end
 
---- @param scrollFrame ScrollFrame|UIPanelScrollFrameTemplate
+--- @param scrollFrame ScrollFrame
 --- @return EditBox editBox
-function addon:CreateEditBox(scrollFrame)
+function addonTable:CreateEditBox(scrollFrame)
     local editBox = CreateFrame("EditBox", "TA_EditBox", scrollFrame)
     editBox:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
     editBox:SetPoint("TOPLEFT", scrollFrame:GetName())
@@ -132,19 +136,19 @@ function addon:CreateEditBox(scrollFrame)
     editBox:SetAltArrowKeyMode(false)
 
     editBox:SetScript("OnTextChanged", function(this)
-        TA.db.profile.trade_text = this:GetText()
+        aceAddon.db.profile.trade_text = this:GetText()
     end)
 
     editBox:SetScript("OnEditFocusGained", function()
-        addon:OnFocusGained()
+        addonTable:OnFocusGained()
     end)
 
     editBox:SetScript("OnEditFocusLost", function()
-        addon:OnFocusLost()
+        addonTable:OnFocusLost()
     end)
 
     editBox:SetScript("OnEscapePressed", function()
-        addon:HideUI()
+        addonTable:HideUI()
     end)
 
     scrollFrame:SetScrollChild(editBox)
@@ -152,29 +156,29 @@ function addon:CreateEditBox(scrollFrame)
     return editBox
 end
 
---- @param mainFrame Frame|UIPanelDialogTemplate
---- @return Button|UIPanelButtonTemplate toggleButton
-function addon:CreateToggleButton(mainFrame)
+--- @param mainFrame Frame
+--- @return Button toggleButton
+function addonTable:CreateToggleButton(mainFrame)
     local toggleButton = CreateFrame("Button", "TA_ToggleButton", mainFrame, "UIPanelButtonTemplate")
     local width = settings.defaultButtons.size.width + 35
     local height = settings.defaultButtons.size.height
 
-    local toggleText = TA.db.profile.is_on and L["TURN_OFF"] or L["TURN_ON"]
+    local toggleText = aceAddon.db.profile.is_on and L["TURN_OFF"] or L["TURN_ON"]
     toggleButton:SetText(tostring(toggleText))
     toggleButton:SetSize(width, height)
     toggleButton:SetPoint("BOTTOMLEFT", mainFrame:GetName(), "BOTTOMLEFT", settings.main.padding, settings.main.padding)
 
     toggleButton:SetScript("OnClick", function(this)
-        addon:ToggleMessage(this)
+        addonTable:ToggleMessage(this)
     end)
 
     return toggleButton
 end
 
---- @param mainFrame Frame|UIPanelDialogTemplate
+--- @param mainFrame Frame
 --- @param editBox EditBox
---- @return Button|UIPanelButtonTemplate testButton
-function addon:CreateTestButton(mainFrame, editBox)
+--- @return Button testButton
+function addonTable:CreateTestButton(mainFrame, editBox)
     local width = settings.defaultButtons.size.width
     local height = settings.defaultButtons.size.height
 
@@ -201,10 +205,10 @@ function addon:CreateTestButton(mainFrame, editBox)
     return testButton
 end
 
---- @param mainFrame Frame|UIPanelDialogTemplate
---- @param relativeButton Button|UIPanelButtonTemplate
---- @return Button|UIPanelButtonTemplate settingsButton
-function addon:CreateSettingsButton(mainFrame, relativeButton)
+--- @param mainFrame Frame
+--- @param relativeButton Button
+--- @return Button settingsButton
+function addonTable:CreateSettingsButton(mainFrame, relativeButton)
     local width = settings.smallButtons.size.width
     local height = settings.smallButtons.size.height
     local padding = settings.smallButtons.padding
@@ -233,11 +237,11 @@ function addon:CreateSettingsButton(mainFrame, relativeButton)
     return settingsButton
 end
 
---- @param mainFrame Frame|UIPanelDialogTemplate
---- @param saveButton Button|UIPanelButtonTemplate
+--- @param mainFrame Frame
+--- @param saveButton Button
 --- @param editBox EditBox
---- @return Button|UIPanelButtonTemplate firstProfessionButton, Button|UIPanelButtonTemplate secondProfessionButton
-function addon:CreateProfessionButtons(mainFrame, saveButton, editBox)
+--- @return Button firstProfessionButton, Button secondProfessionButton
+function addonTable:CreateProfessionButtons(mainFrame, saveButton, editBox)
     local firstProfession, secondProfession = GetProfessions()
     local firstProfessionButton, secondProfessionButton
 
@@ -273,11 +277,11 @@ end
 --- @param name string
 --- @param icon string
 --- @param skillLineId number
---- @param mainFrame Frame|UIPanelDialogTemplate
+--- @param mainFrame Frame
 --- @param editBox EditBox
---- @param relativeButton Button|UIPanelButtonTemplate
---- @return Button|UIPanelButtonTemplate button
-function addon:CreateProfessionButton(buttonName, name, icon, skillLineId, mainFrame, editBox, relativeButton)
+--- @param relativeButton Button
+--- @return Button button
+function addonTable:CreateProfessionButton(buttonName, name, icon, skillLineId, mainFrame, editBox, relativeButton)
     local button = CreateFrame("Button", buttonName, mainFrame, "UIPanelButtonTemplate")
     local width = settings.smallButtons.size.width
     local height = settings.smallButtons.size.height
@@ -312,7 +316,7 @@ end
 
 --- @param skillLineId number?
 --- @return string? link
-function addon:GetLinkForProfession(skillLineId)
+function addonTable:GetLinkForProfession(skillLineId)
     local link
 
     if skillLineId then
@@ -324,8 +328,8 @@ function addon:GetLinkForProfession(skillLineId)
     return link
 end
 
---- @return Frame|UIPanelDialogTemplate mainFrame, EditBox editBox
-function addon:CreateUI()
+--- @return Frame mainFrame, EditBox editBox
+function addonTable:CreateUI()
     local mainFrame = self:CreateMainFrame()
     self:CreateLabel(mainFrame)
     local scrollFrame = self:CreateScrollFrame(mainFrame)

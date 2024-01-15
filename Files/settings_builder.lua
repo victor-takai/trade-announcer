@@ -1,10 +1,15 @@
---- Addon name, namespace
-local addonName, addon = ...
+---@diagnostic disable: inject-field
 
---- Locale
+--- Addon name, namespace
+local addonName, addonTable = ...
+
+--- AceAddon local variable
+local aceAddon = addonTable.aceAddon
+
+--- AceLocale local variable
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
---- @enum Enum.ChatType
+---@enum Enum.ChatType
 local ChatType = {
     Channel = 1,
     Say = 2,
@@ -17,8 +22,7 @@ local ChatType = {
     Officer = 9,
 }
 
-function addon:CreateInterfaceOptions()
-    ---@class Frame
+function addonTable:CreateInterfaceOptions()
     local panel = CreateFrame("Frame")
     panel.name = addonName
 
@@ -31,7 +35,7 @@ function addon:CreateInterfaceOptions()
     return title, channelDropDown, intervalSlider
 end
 
-function addon:CreateTitle(panel)
+function addonTable:CreateTitle(panel)
     local title = panel:CreateFontString("TA_SettingsTitle", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 16, -16)
 
@@ -45,7 +49,7 @@ function addon:CreateTitle(panel)
     return title
 end
 
-function addon:CreateIntervalDropdown(parent, reference, name)
+function addonTable:CreateIntervalDropdown(parent, reference, name)
     local chatTypes = {}
     for key, value in pairs(ChatType) do
         chatTypes[value] = key
@@ -76,8 +80,8 @@ function addon:CreateIntervalDropdown(parent, reference, name)
                 info.value = value
                 info.func = function(self)
                     if self.value ~= 1 then
-                        TA.db.profile.chat_type = self.value
-                        TA.db.profile.channel_type = nil
+                        aceAddon.db.profile.chat_type = self.value
+                        aceAddon.db.profile.channel_type = nil
                         UIDropDownMenu_SetText(dropDown, self:GetText())
                     end
                 end
@@ -88,7 +92,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
                     info.menuList = nil
                     info.hasArrow = false
                 end
-                info.checked = value == TA.db.profile.chat_type
+                info.checked = value == aceAddon.db.profile.chat_type
                 UIDropDownMenu_AddButton(info, level)
             end
 
@@ -99,12 +103,12 @@ function addon:CreateIntervalDropdown(parent, reference, name)
                     info.text = channel.name
                     info.value = channel.id
                     info.func = function(self)
-                        TA.db.profile.chat_type = 1
-                        TA.db.profile.channel_type = self.value
+                        aceAddon.db.profile.chat_type = 1
+                        aceAddon.db.profile.channel_type = self.value
                         UIDropDownMenu_SetText(dropDown, chatTypes[1] .. ": " .. self:GetText())
                         CloseDropDownMenus()
                     end
-                    info.checked = channel.id == TA.db.profile.channel_type
+                    info.checked = channel.id == aceAddon.db.profile.channel_type
                     UIDropDownMenu_AddButton(info, level)
                 end
             end
@@ -113,8 +117,8 @@ function addon:CreateIntervalDropdown(parent, reference, name)
     end)
 
     --- Loads last selected chat type
-    local chatType = TA.db.profile.chat_type
-    local channelType = TA.db.profile.channel_type
+    local chatType = aceAddon.db.profile.chat_type
+    local channelType = aceAddon.db.profile.channel_type
 
     if chatType then
         local channelName
@@ -138,7 +142,7 @@ function addon:CreateIntervalDropdown(parent, reference, name)
     return dropDown
 end
 
-function addon:CreateIntervalSlider(parent, reference, name)
+function addonTable:CreateIntervalSlider(parent, reference, name)
     local sliderTitle = parent:CreateFontString("TA_SettingsSliderTitle", "ARTWORK", "GameFontNormalSmall")
     sliderTitle:SetPoint("TOPLEFT", reference, "BOTTOMLEFT", 18, -16)
 	sliderTitle:SetText(L["INTERVAL"])
@@ -160,12 +164,12 @@ function addon:CreateIntervalSlider(parent, reference, name)
 	_G[slider:GetName() .. "High"]:SetText("120s")
 
 	slider:SetScript("OnValueChanged", function(_, value)
-        TA.db.profile.interval = value
+        aceAddon.db.profile.interval = value
         sliderValueText:SetText("|cffffcc00" .. value .. "s|r")
 	end)
 
     sliderValueText:SetPoint("CENTER", slider, 0, -10)
-	sliderValueText:SetText("|cffffcc00" .. TA.db.profile.interval .. "s|r")
+	sliderValueText:SetText("|cffffcc00" .. aceAddon.db.profile.interval .. "s|r")
 	sliderValueText:SetJustifyH("CENTER")
 	sliderValueText:SetWidth(100)
 
