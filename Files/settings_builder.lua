@@ -27,7 +27,7 @@ function addonTable:CreateInterfaceOptions()
     panel.name = addonName
 
     local title = self:CreateTitle(panel)
-    local channelDropDown = self:CreateIntervalDropdown(panel, title, "TA_Channel_Dropdown")
+    local channelDropDown = self:CreateChatTypeDropdown(panel, title, "TA_Chat_Type_Dropdown")
     local intervalSlider = self:CreateIntervalSlider(panel, channelDropDown, "TA_Interval_Slider")
 
 	InterfaceOptions_AddCategory(panel)
@@ -49,10 +49,10 @@ function addonTable:CreateTitle(panel)
     return title
 end
 
-function addonTable:CreateIntervalDropdown(parent, reference, name)
+function addonTable:CreateChatTypeDropdown(parent, reference, name)
     local chatTypes = {}
     for key, value in pairs(ChatType) do
-        chatTypes[value] = key
+        chatTypes[value] = L[string.upper(key)]
     end
 
     local joinedChannels = self:GetJoinedChannels()

@@ -244,23 +244,23 @@ end
 --- Get chat name based on type
 function addonTable:GetChatName(chatType)
     if chatType == 1 then
-		return "CHANNEL"
+		return L["CHANNEL"]
 	elseif chatType == 2 then
-		return "SAY"
+		return L["SAY"]
 	elseif chatType == 3 then
-		return "YELL"
+		return L["YELL"]
 	elseif chatType == 4 then
-		return "PARTY"
+		return L["PARTY"]
 	elseif chatType == 5 then
-		return "RAID"
+		return L["RAID"]
 	elseif chatType == 6 then
-		return "INSTANCE_CHAT"
+		return L["INSTANCE_CHAT"]
 	elseif chatType == 7 then
-		return "BATTLEGROUND"
+		return L["BATTLEGROUND"]
     elseif chatType == 8 then
-		return "GUILD"
+		return L["GUILD"]
     elseif chatType == 9 then
-		return "OFFICER"
+		return L["OFFICER"]
     end
 	return nil
 end

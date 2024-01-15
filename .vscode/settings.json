@@ -372,6 +372,7 @@
         "BINDING_HEADER_OTHER",
         "ITEM_QUALITY_COLORS",
         "PET",
-        "REPUTATION_PROGRESS_FORMAT"
+        "REPUTATION_PROGRESS_FORMAT",
+        "CHANNEL"
     ],
 }
