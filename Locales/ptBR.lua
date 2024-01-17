@@ -20,11 +20,13 @@ L["MESSAGE_WILL_BE_DISPLAYED"] = " e será exibida em #INTERVAL# segundos"
 L["SET_CHAT_CHANNEL_FIRST"] = addonNamePrint .. "|cffff2020Primeiro configure o chat/canal nas configurações do addon para poder ligá-lo|r"
 
 L["TEST_BUTTON"] = "Testar"
-L["YOUR_TRADE_MESSAGE"] = addonNamePrint .. "Sua mensagem: \n"
-L["SHOWS_YOUR_TRADE_MESSAGE"] = "Exibe sua mensagem automática usando o comando print"
+L["ADVERTISE_BUTTON"] = "Anunciar"
+L["YOUR_MESSAGE"] = addonNamePrint .. "Sua mensagem: \n"
+L["SHOW_YOUR_MESSAGE"] = "Exibe sua |cff6699ffmensagem|r"
+L["SEND_YOUR_MESSAGE"] = "Envia sua |cff6699ffmensagem|r para o chat"
 
-L["OPENS_SETTINGS"] = "Abrir página de |cff6699ffconfigurações|r"
-L["ADDS_PROFESSION"] = "Adicionar |cffFFC125[#PROFESSION#]|r à mensagem"
+L["OPEN_SETTINGS"] = "Abre a página de |cff6699ffconfigurações|r"
+L["ADD_PROFESSION"] = "Vincula |cffFFC125[#PROFESSION#]|r à sua mensagem"
 
 L["CHAT_TYPE"] = "Tipo do chat"
 L["SET_CHAT_TYPE"] = "Selecione o chat"

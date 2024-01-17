@@ -373,6 +373,7 @@
         "ITEM_QUALITY_COLORS",
         "PET",
         "REPUTATION_PROGRESS_FORMAT",
-        "CHANNEL"
+        "CHANNEL",
+        "ButtonFrameTemplate_HidePortrait"
     ],
 }

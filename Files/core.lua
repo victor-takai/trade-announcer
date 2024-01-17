@@ -82,6 +82,7 @@ end
 --- Creates invisible frame for tracking time
 function addonTable:SetupUpdateFrame()
     updateFrame = CreateFrame("Frame")
+    updateFrame:SetSize(1, 1)
     updateFrame:SetFrameStrata("HIGH")
     updateFrame:SetToplevel(true)
     updateFrame:SetMovable(false)
@@ -135,14 +136,8 @@ function UpdateFrameOnUpdate(self, elapsed)
     end
 
 	self.timeSinceLastUpdate = self.timeSinceLastUpdate + elapsed
-    local message = aceAddon.db.profile.trade_text
-
 	if self.timeSinceLastUpdate >= aceAddon.db.profile.interval then
-        if message ~= "" then
-            local chatType = addonTable:GetChatName(aceAddon.db.profile.chat_type)
-            local target = aceAddon.db.profile.channel_type
-            MessageQueue.SendChatMessage(message, chatType, nil, target)
-        end
+        aceAddon:SendAutoMessage()
 		self.timeSinceLastUpdate = 0
 	end
 end
@@ -187,6 +182,16 @@ function addonTable:CreateMinimapButton()
     icon:Register(addonName, tradeAnnouncerLDB, aceAddon.db.profile.minimap)
 end
 
+--- Sends the message
+function addonTable:SendAutoMessage()
+    local message = aceAddon.db.profile.trade_text
+    if message ~= "" then
+        local chatType = addonTable:GetChatName(aceAddon.db.profile.chat_type)
+        local target = aceAddon.db.profile.channel_type
+        MessageQueue.SendChatMessage(message, chatType, nil, target)
+    end
+end
+
 --- Toggles auto message
 function addonTable:ToggleMessage(toggleButton)
     if aceAddon.db.profile.chat_type or aceAddon.db.profile.channel_type then
@@ -223,7 +228,7 @@ function addonTable:ShowUI()
         editBox:SetCursorPosition(editBox:GetText():len())
     end
     mainFrame:Show()
-    editBox:SetFocus()
+    -- editBox:SetFocus() // TODO: AUTO FOCUS IF ENABLED
 end
 
 --- Shows the UI
