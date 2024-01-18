@@ -185,7 +185,7 @@ function addonTable:CreateMinimapButton()
 end
 
 --- Sends the message
-function addonTable:SendAutoMessage()
+function addonTable:SendMessage()
     if aceAddon.db.profile.chat_type or aceAddon.db.profile.channel_type then
         local message = aceAddon.db.profile.trade_text
         if message ~= "" then
@@ -196,6 +196,11 @@ function addonTable:SendAutoMessage()
     else
         print(L["SET_CHAT_CHANNEL"])
     end
+end
+
+--- Prints the message
+function addonTable:PrintMessage()
+    print(L["YOUR_MESSAGE"] .. editBox:GetText())
 end
 
 --- Toggles auto message
@@ -215,6 +220,11 @@ function addonTable:ToggleMessage(toggleButton)
     else
         print(L["SET_CHAT_CHANNEL"])
     end
+end
+
+--- Inserts profession link in the message 
+function addonTable:LinkProfession(professionLink)
+    editBox:Insert(professionLink)
 end
 
 --- Toggles the UI
@@ -242,6 +252,11 @@ end
 --- Shows the UI
 function addonTable:HideUI()
     mainFrame:Hide()
+end
+
+--- Focus edit box
+function addonTable:FocusEditBox()
+    editBox:SetFocus()
 end
 
 --- Trigered when EditBox gains focus

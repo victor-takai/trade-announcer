@@ -9,13 +9,6 @@ local aceAddon = addonTable.aceAddon
 --- AceLocale local variable
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
---- Local variables
-local mainFrame, mainFrameInset
-local scrollFrame, scrollBar, editBox
-local hButtonsFrame
-local firstLinkButton, secondLinkButton
-local toggleButton, testButton, advertiseButton
-
 --- Settings table
 local settings = {
     mainFrame = {
@@ -33,8 +26,9 @@ local settings = {
     },
 }
 
+--- @return Frame mainFrame, Frame mainFrameInset
 function addonTable:CreateMainFrame()
-    mainFrame = CreateFrame("Frame", "TradeAnnouncerMainFrame", UIParent, "ButtonFrameTemplate")
+    local mainFrame = CreateFrame("Frame", "TradeAnnouncerMainFrame", UIParent, "ButtonFrameTemplate")
 
     --- Hide portrait
     ButtonFrameTemplate_HidePortrait(mainFrame)
@@ -47,11 +41,11 @@ function addonTable:CreateMainFrame()
     title:SetText("|cff66bbff" .. addonName .. "|r")
 
     --- Setup inset
-    mainFrameInset = mainFrame.Inset
+    local mainFrameInset = mainFrame.Inset
     mainFrameInset:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 12, -10)
     mainFrameInset:SetPoint("BOTTOMRIGHT", mainFrame, -25, 38)
-    mainFrameInset.Bg:SetScript("OnMouseDown", function (_, _)
-        editBox:SetFocus()
+    mainFrameInset.Bg:SetScript("OnMouseDown", function()
+        addonTable:FocusEditBox()
     end)
 
     local width = settings.mainFrame.size.width
@@ -95,16 +89,21 @@ function addonTable:CreateMainFrame()
     mainFrame:SetScript("OnHide", function(this)
         this:SetMovable(false)
     end)
+
+    return mainFrame, mainFrameInset
 end
 
-function addonTable:CreateScrollFrame()
-    scrollFrame = CreateFrame("ScrollFrame", "TradeAnnouncerScrollFrame", mainFrame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", mainFrameInset, 5, -5)
-    scrollFrame:SetPoint("BOTTOMLEFT", mainFrameInset, 5, 5)
-    scrollFrame:SetPoint("RIGHT", mainFrame)
+--- @param parentFrame Frame
+--- @param boundingFrame Frame
+--- @return ScrollFrame scrollFrame
+function addonTable:CreateScrollFrame(parentFrame, boundingFrame)
+    local scrollFrame = CreateFrame("ScrollFrame", "TradeAnnouncerScrollFrame", parentFrame, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetPoint("TOPLEFT", boundingFrame, 5, -5)
+    scrollFrame:SetPoint("BOTTOMLEFT", boundingFrame, 5, 5)
+    scrollFrame:SetPoint("RIGHT", parentFrame)
     scrollFrame:SetClipsChildren(true)
 
-    scrollBar = scrollFrame.ScrollBar
+    local scrollBar = scrollFrame.ScrollBar
     scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", -22, -16)
     scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", -22, 16)
     scrollBar.Bg = scrollBar:CreateTexture("TradeAnnouncerScrollFrameBg", "BACKGROUND")
@@ -112,11 +111,16 @@ function addonTable:CreateScrollFrame()
     scrollBar.Bg:SetHorizTile(true)
     scrollBar.Bg:SetVertTile(true)
     scrollBar.Bg:SetAllPoints(scrollBar)
+
+    return scrollFrame
 end
 
-function addonTable:CreateEditBox()
-    editBox = CreateFrame("EditBox", "TradeAnnouncerEditBox", scrollFrame)
-    editBox:SetSize(mainFrameInset:GetWidth(), mainFrameInset:GetHeight())
+--- @param scrollFrame ScrollFrame
+--- @param boundingFrame Frame
+--- @return EditBox editBox
+function addonTable:CreateEditBox(scrollFrame, boundingFrame)
+    local editBox = CreateFrame("EditBox", "TradeAnnouncerEditBox", scrollFrame)
+    editBox:SetSize(boundingFrame:GetWidth(), boundingFrame:GetHeight())
 
     -- editBox.Bg = editBox:CreateTexture(nil, "BACKGROUND")
     -- editBox.Bg:SetAllPoints(editBox)
@@ -147,26 +151,43 @@ function addonTable:CreateEditBox()
     end)
 
     scrollFrame:SetScrollChild(editBox)
+
+    return editBox
 end
 
-function addonTable:CreateButtonsFrame()
-    hButtonsFrame = CreateFrame("Frame", "TradeAnnouncerHButtonsFrame", mainFrame)
-    hButtonsFrame:SetPoint("TOPLEFT", mainFrameInset, "BOTTOMLEFT")
-    hButtonsFrame:SetPoint("BOTTOMLEFT", mainFrame, 0, 5)
-    hButtonsFrame:SetPoint("BOTTOMRIGHT", mainFrame, 0, 5)
+--- @param parentFrame Frame
+--- @param boundingFrame Frame
+--- @return Button testButton, Button advertiseButton, Button toggleButton, Button firstLinkButton, Button secondLinkButton
+function addonTable:CreateButtons(parentFrame, boundingFrame)
+    local hButtonsFrame = CreateFrame("Frame", "TradeAnnouncerHButtonsFrame", parentFrame)
+    hButtonsFrame:SetPoint("TOPLEFT", boundingFrame, "BOTTOMLEFT")
+    hButtonsFrame:SetPoint("BOTTOMLEFT", parentFrame, 0, 5)
+    hButtonsFrame:SetPoint("BOTTOMRIGHT", parentFrame, 0, 5)
 
     -- hButtonsFrame.Bg = hButtonsFrame:CreateTexture("TradeAnnouncerHButtonsFrameBg", "BACKGROUND")
     -- hButtonsFrame.Bg:SetAllPoints(hButtonsFrame)
     -- hButtonsFrame.Bg:SetColorTexture(0.2, 0.6, 0, 0.5)
 
-    testButton = CreateFrame("Button", "TradeAnnouncerTestButton", hButtonsFrame, "UIPanelButtonTemplate")
+    local testButton = self:CreateTestButton(hButtonsFrame)
+    local advertiseButton = self:CreateAdvertiseButton(hButtonsFrame, testButton)
+    local toggleButton = self:CreateToggleButton(hButtonsFrame, advertiseButton)
+
+    local firstLinkButton, secondLinkButton = self:CreateProfessionButtons(hButtonsFrame)
+
+    return testButton, advertiseButton, toggleButton, firstLinkButton, secondLinkButton
+end
+
+--- @param parentFrame Frame
+--- @return Button testButton
+function addonTable:CreateTestButton(parentFrame)
+    local testButton = CreateFrame("Button", "TradeAnnouncerTestButton", parentFrame, "UIPanelButtonTemplate")
     testButton:SetText(tostring(L["TEST_BUTTON"]))
     testButton:SetSize(settings.defaultButtons.size.width, settings.defaultButtons.size.height)
-    testButton:SetPoint("RIGHT", hButtonsFrame, -5, 0)
-    testButton:SetPoint("CENTER", hButtonsFrame)
+    testButton:SetPoint("RIGHT", parentFrame, -5, 0)
+    testButton:SetPoint("CENTER", parentFrame)
 
     testButton:SetScript("OnClick", function()
-        print(L["YOUR_MESSAGE"] .. editBox:GetText())
+        addonTable:PrintMessage()
     end)
 
     testButton:SetScript("OnEnter", function(this)
@@ -181,10 +202,17 @@ function addonTable:CreateButtonsFrame()
         GameTooltip:Hide()
     end)
 
-    advertiseButton = CreateFrame("Button", "TradeAnnouncerAdvertiseButton", hButtonsFrame, "UIPanelButtonTemplate")
+    return testButton
+end
+
+--- @param parentFrame Frame
+--- @param relativeFrame Frame
+--- @return Button advertiseButton
+function addonTable:CreateAdvertiseButton(parentFrame, relativeFrame)
+    local advertiseButton = CreateFrame("Button", "TradeAnnouncerAdvertiseButton", parentFrame, "UIPanelButtonTemplate")
     advertiseButton:SetText(tostring(L["ADVERTISE_BUTTON"]))
     advertiseButton:SetSize(settings.defaultButtons.size.width + 35, settings.defaultButtons.size.height)
-    advertiseButton:SetPoint("TOPRIGHT", testButton, "TOPLEFT", -5, 0)
+    advertiseButton:SetPoint("TOPRIGHT", relativeFrame, "TOPLEFT", -5, 0)
 
     advertiseButton:SetScript("OnEnter", function(this)
         if not aceAddon.db.profile.hide_tooltips then
@@ -199,30 +227,39 @@ function addonTable:CreateButtonsFrame()
     end)
 
     advertiseButton:SetScript("OnClick", function(this)
-        addonTable:SendAutoMessage()
+        addonTable:SendMessage()
     end)
 
-    toggleButton = CreateFrame("Button", "TradeAnnouncerToggleButton", hButtonsFrame, "UIPanelButtonTemplate")
+    return advertiseButton
+end
+
+--- @param parentFrame Frame
+--- @param relativeFrame Frame
+--- @return Button toggleButton
+function addonTable:CreateToggleButton(parentFrame, relativeFrame)
+    local toggleButton = CreateFrame("Button", "TradeAnnouncerToggleButton", parentFrame, "UIPanelButtonTemplate")
     local toggleText = aceAddon.db.profile.is_on and L["TURN_OFF"] or L["TURN_ON"]
     toggleButton:SetText(tostring(toggleText))
     toggleButton:SetSize(settings.defaultButtons.size.width + 25, settings.defaultButtons.size.height)
-    toggleButton:SetPoint("TOPRIGHT", advertiseButton, "TOPLEFT", -5, 0)
+    toggleButton:SetPoint("TOPRIGHT", relativeFrame, "TOPLEFT", -5, 0)
 
     toggleButton:SetScript("OnClick", function(this)
         addonTable:ToggleMessage(this)
     end)
 
-    self:CreateProfessionButtons(hButtonsFrame)
+    return toggleButton
 end
 
+--- @param parentFrame Frame
+--- @return Button firstLinkButton, Button secondLinkButton
 function addonTable:CreateProfessionButtons(parentFrame)
     local firstProfession, secondProfession = GetProfessions()
     local number = 1
+    local firstLinkButton, secondLinkButton
 
     if firstProfession then
         local name, _, _, _, _, _, skillLine = GetProfessionInfo(firstProfession)
         firstLinkButton = self:CreateProfessionButton(
-            "TradeAnnouncerFirstProfessionButton",
             name,
             number,
             skillLine,
@@ -234,7 +271,6 @@ function addonTable:CreateProfessionButtons(parentFrame)
     if secondProfession then
         local name, _, _, _, _, _, skillLine = GetProfessionInfo(secondProfession)
         secondLinkButton = self:CreateProfessionButton(
-            "TradeAnnouncerSecondProfessionButton",
             name,
             number,
             skillLine,
@@ -242,16 +278,18 @@ function addonTable:CreateProfessionButtons(parentFrame)
             firstLinkButton
         )
     end
+
+    return firstLinkButton, secondLinkButton
 end
 
---- @param buttonName string
 --- @param name string
 --- @param number number
 --- @param skillLineId number
 --- @param parentFrame Frame
 --- @param relativeFrame Button
 --- @return Button button
-function addonTable:CreateProfessionButton(buttonName, name, number, skillLineId, parentFrame, relativeFrame)
+function addonTable:CreateProfessionButton(name, number, skillLineId, parentFrame, relativeFrame)
+    local buttonName = "TradeAnnouncerLink" .. number .. "Button"
     local button = CreateFrame("Button", buttonName, parentFrame, "UIPanelButtonTemplate")
 
     button:SetText("Link #" .. tostring(number))
@@ -266,7 +304,7 @@ function addonTable:CreateProfessionButton(buttonName, name, number, skillLineId
     button:SetScript("OnClick", function()
         local professionLink = self:GetLinkForProfession(skillLineId)
         if professionLink then
-            editBox:Insert(professionLink)
+            addonTable:LinkProfession(professionLink)
         end
     end)
 
@@ -303,9 +341,9 @@ end
 
 --- @return Frame mainFrame, EditBox editBox
 function addonTable:CreateUI()
-    self:CreateMainFrame()
-    self:CreateScrollFrame()
-    self:CreateEditBox()
-    self:CreateButtonsFrame()
+    local mainFrame, mainFrameInset = self:CreateMainFrame()
+    local scrollFrame = self:CreateScrollFrame(mainFrame, mainFrameInset)
+    local editBox = self:CreateEditBox(scrollFrame, mainFrameInset)
+    _ = self:CreateButtons(mainFrame, mainFrameInset)
     return mainFrame, editBox
 end
