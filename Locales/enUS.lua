@@ -30,6 +30,8 @@ L["ADD_PROFESSION"] = "Link |cffFFC125[#PROFESSION#]|r to your message"
 
 L["CHAT_TYPE"] = "Chat type"
 L["SET_CHAT_TYPE"] = "Set the chat type"
+L["AUTO_FOCUS"] = "Auto-focus message window"
+L["HIDE_TOOLTIPS"] = "Hide tooltips"
 
 L["CHANNEL"] = "Channel"
 L["SAY"] = "Say"
