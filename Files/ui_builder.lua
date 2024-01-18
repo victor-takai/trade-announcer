@@ -172,9 +172,9 @@ function addonTable:CreateButtons(parentFrame, boundingFrame)
     local advertiseButton = self:CreateAdvertiseButton(hButtonsFrame, testButton)
     local toggleButton = self:CreateToggleButton(hButtonsFrame, advertiseButton)
 
-    local firstLinkButton, secondLinkButton = self:CreateProfessionButtons(hButtonsFrame)
+    local link1Button, link2Button = self:CreateProfessionButtons(hButtonsFrame)
 
-    return testButton, advertiseButton, toggleButton, firstLinkButton, secondLinkButton
+    return testButton, advertiseButton, toggleButton, link1Button, link2Button
 end
 
 --- @param parentFrame Frame
@@ -253,13 +253,13 @@ end
 --- @param parentFrame Frame
 --- @return Button firstLinkButton, Button secondLinkButton
 function addonTable:CreateProfessionButtons(parentFrame)
-    local firstProfession, secondProfession = GetProfessions()
+    local profession1Id, profession2Id = GetProfessions()
     local number = 1
-    local firstLinkButton, secondLinkButton
+    local link1Button, link2Button
 
-    if firstProfession then
-        local name, _, _, _, _, _, skillLine = GetProfessionInfo(firstProfession)
-        firstLinkButton = self:CreateProfessionButton(
+    if profession1Id and not self:IsGatheringProfession(profession1Id) then
+        local name, _, _, _, _, _, skillLine = GetProfessionInfo(profession1Id)
+        link1Button = self:CreateProfessionButton(
             name,
             number,
             skillLine,
@@ -268,18 +268,30 @@ function addonTable:CreateProfessionButtons(parentFrame)
         )
         number = number + 1
     end
-    if secondProfession then
-        local name, _, _, _, _, _, skillLine = GetProfessionInfo(secondProfession)
-        secondLinkButton = self:CreateProfessionButton(
+    if profession2Id and not self:IsGatheringProfession(profession2Id) then
+        local name, _, _, _, _, _, skillLine = GetProfessionInfo(profession2Id)
+        link2Button = self:CreateProfessionButton(
             name,
             number,
             skillLine,
             parentFrame,
-            firstLinkButton
+            link1Button
         )
     end
 
-    return firstLinkButton, secondLinkButton
+    return link1Button, link2Button
+end
+
+--- @param index number
+--- @return boolean
+function addonTable:IsGatheringProfession(index)
+    local array = {182, 186, 389} -- Herbalism, Mining and Skinning
+    for i = 1, #array do
+        if array[i] == index then
+            return false
+        end
+    end
+    return true
 end
 
 --- @param name string
