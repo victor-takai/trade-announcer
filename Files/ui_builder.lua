@@ -257,41 +257,45 @@ function addonTable:CreateProfessionButtons(parentFrame)
     local number = 1
     local link1Button, link2Button
 
-    if profession1Id and not self:IsGatheringProfession(profession1Id) then
+    if profession1Id then
         local name, _, _, _, _, _, skillLine = GetProfessionInfo(profession1Id)
-        link1Button = self:CreateProfessionButton(
-            name,
-            number,
-            skillLine,
-            parentFrame,
-            nil
-        )
-        number = number + 1
+        if not self:IsGatheringProfession(skillLine) then
+            link1Button = self:CreateProfessionButton(
+                name,
+                number,
+                skillLine,
+                parentFrame,
+                nil
+            )
+            number = number + 1
+        end
     end
-    if profession2Id and not self:IsGatheringProfession(profession2Id) then
+    if profession2Id then
         local name, _, _, _, _, _, skillLine = GetProfessionInfo(profession2Id)
-        link2Button = self:CreateProfessionButton(
-            name,
-            number,
-            skillLine,
-            parentFrame,
-            link1Button
-        )
+        if not self:IsGatheringProfession(skillLine) then
+            link2Button = self:CreateProfessionButton(
+                name,
+                number,
+                skillLine,
+                parentFrame,
+                link1Button
+            )
+        end
     end
 
     return link1Button, link2Button
 end
 
---- @param index number
+--- @param skillLine number
 --- @return boolean
-function addonTable:IsGatheringProfession(index)
-    local array = {182, 186, 389} -- Herbalism, Mining and Skinning
+function addonTable:IsGatheringProfession(skillLine)
+    local array = {182, 186, 393} -- Herbalism, Mining and Skinning
     for i = 1, #array do
-        if array[i] == index then
-            return false
+        if array[i] == skillLine then
+            return true
         end
     end
-    return true
+    return false
 end
 
 --- @param name string
