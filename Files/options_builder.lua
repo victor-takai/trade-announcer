@@ -30,7 +30,7 @@ function addonTable:CreateInterfaceOptions()
     local dropDownFrame = self:CreateChatTypeDropdown(panel, title)
     local intervalFrame = self:CreateIntervalSlider(panel, dropDownFrame)
     local checkBoxFrame = self:CreateAutoFocusCheckBox(panel, intervalFrame)
-    local hideTooltipsFrame = self:CreateHideTooltipsCheckBox(panel, checkBoxFrame)
+    local _ = self:CreateHideTooltipsCheckBox(panel, checkBoxFrame)
 
 	InterfaceOptions_AddCategory(panel)
 end

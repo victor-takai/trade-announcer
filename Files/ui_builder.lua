@@ -294,6 +294,7 @@ function addonTable:CreateProfessionButton(name, number, skillLineId, parentFram
 
     button:SetText("Link #" .. tostring(number))
     button:SetSize(settings.defaultButtons.size.width + 15, settings.defaultButtons.size.height)
+
     if relativeFrame == nil then
         button:SetPoint("LEFT", parentFrame)
         button:SetPoint("CENTER", parentFrame)
@@ -304,7 +305,13 @@ function addonTable:CreateProfessionButton(name, number, skillLineId, parentFram
     button:SetScript("OnClick", function()
         local professionLink = self:GetLinkForProfession(skillLineId)
         if professionLink then
-            addonTable:LinkProfession(professionLink)
+            local chatFrame = DEFAULT_CHAT_FRAME
+            local editBox = chatFrame.editBox
+            if editBox:IsVisible() and editBox:HasFocus() then
+                editBox:Insert(professionLink)
+            else
+                addonTable:LinkProfession(professionLink)
+            end
         end
     end)
 
