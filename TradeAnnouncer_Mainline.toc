@@ -11,4 +11,4 @@ Locales\locales.xml
 
 Files\core.lua
 Files\ui_builder.lua
-Files\settings_builder.lua
+Files\options_builder.lua

@@ -34,6 +34,8 @@ local defaults = {
         interval = 30, -- Default time interval
         chat_type = nil, -- Default chat
         channel_type = nil, -- Default channel
+        auto_focus_enabled = false, -- Default auto focus
+        hide_tooltips = false, -- Default hide tooltips
     },
 }
 
@@ -184,11 +186,15 @@ end
 
 --- Sends the message
 function addonTable:SendAutoMessage()
-    local message = aceAddon.db.profile.trade_text
-    if message ~= "" then
-        local chatType = addonTable:GetChatName(aceAddon.db.profile.chat_type)
-        local target = aceAddon.db.profile.channel_type
-        MessageQueue.SendChatMessage(message, chatType, nil, target)
+    if aceAddon.db.profile.chat_type or aceAddon.db.profile.channel_type then
+        local message = aceAddon.db.profile.trade_text
+        if message ~= "" then
+            local chatType = addonTable:GetChatName(aceAddon.db.profile.chat_type)
+            local target = aceAddon.db.profile.channel_type
+            MessageQueue.SendChatMessage(message, chatType, nil, target)
+        end
+    else
+        print(L["SET_CHAT_CHANNEL"])
     end
 end
 
@@ -207,7 +213,7 @@ function addonTable:ToggleMessage(toggleButton)
         end
         print(message)
     else
-        print(L["SET_CHAT_CHANNEL_FIRST"])
+        print(L["SET_CHAT_CHANNEL"])
     end
 end
 
@@ -228,7 +234,9 @@ function addonTable:ShowUI()
         editBox:SetCursorPosition(editBox:GetText():len())
     end
     mainFrame:Show()
-    -- editBox:SetFocus() // TODO: AUTO FOCUS IF ENABLED
+    if aceAddon.db.profile.auto_focus_enabled then
+        editBox:SetFocus()
+    end
 end
 
 --- Shows the UI

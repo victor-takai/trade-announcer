@@ -1,4 +1,4 @@
----@diagnostic disable: return-type-mismatch, undefined-field
+---@diagnostic disable: return-type-mismatch, undefined-field, param-type-mismatch
 
 --- Addon name, namespace
 local addonName, addonTable = ...
@@ -12,8 +12,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 --- Local variables
 local mainFrame, mainFrameInset
 local scrollFrame, scrollBar, editBox
-local vButtonsFrame, hButtonsFrame
-local settingsButton, firstProfessionButton, secondProfessionButton
+local hButtonsFrame
+local firstLinkButton, secondLinkButton
 local toggleButton, testButton, advertiseButton
 
 --- Settings table
@@ -28,13 +28,6 @@ local settings = {
     defaultButtons = {
         size = {
             width = 50,
-            height = 25,
-        },
-    },
-
-    smallButtons = {
-        size = {
-            width = 25,
             height = 25,
         },
     },
@@ -55,7 +48,7 @@ function addonTable:CreateMainFrame()
 
     --- Setup inset
     mainFrameInset = mainFrame.Inset
-    mainFrameInset:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 40, -10)
+    mainFrameInset:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 12, -10)
     mainFrameInset:SetPoint("BOTTOMRIGHT", mainFrame, -25, 38)
     mainFrameInset.Bg:SetScript("OnMouseDown", function (_, _)
         editBox:SetFocus()
@@ -124,6 +117,7 @@ end
 function addonTable:CreateEditBox()
     editBox = CreateFrame("EditBox", "TradeAnnouncerEditBox", scrollFrame)
     editBox:SetSize(mainFrameInset:GetWidth(), mainFrameInset:GetHeight())
+
     -- editBox.Bg = editBox:CreateTexture(nil, "BACKGROUND")
     -- editBox.Bg:SetAllPoints(editBox)
     -- editBox.Bg:SetColorTexture(0.2, 0.6, 0, 0.5)
@@ -156,37 +150,8 @@ function addonTable:CreateEditBox()
 end
 
 function addonTable:CreateButtonsFrame()
-    vButtonsFrame = CreateFrame("Frame", "TradeAnnouncerVButtonsFrame", mainFrame)
-    vButtonsFrame:SetPoint("TOPLEFT", mainFrame.TitleContainer, "BOTTOMLEFT", 10, -6)
-    vButtonsFrame:SetPoint("BOTTOMRIGHT", mainFrameInset, "BOTTOMLEFT")
-
-    -- vButtonsFrame.Bg = vButtonsFrame:CreateTexture("TradeAnnouncerVButtonsFrameBg", "BACKGROUND")
-    -- vButtonsFrame.Bg:SetAllPoints(vButtonsFrame)
-    -- vButtonsFrame.Bg:SetColorTexture(0.2, 0, 0.6, 0.5)
-
-    local icon = "Interface\\Icons\\INV_Misc_Gear_06"
-    settingsButton = CreateFrame("Button", "TradeAnnouncerSettingsButton", vButtonsFrame, "UIPanelButtonTemplate")
-    settingsButton:SetNormalTexture(icon)
-    settingsButton:SetPushedTexture(icon)
-    settingsButton:SetSize(settings.smallButtons.size.width, settings.smallButtons.size.height)
-    settingsButton:SetPoint("TOP", vButtonsFrame, 0, -5)
-    settingsButton:SetPoint("CENTER", vButtonsFrame)
-    settingsButton:SetScript("OnClick", function()
-        InterfaceOptionsFrame_OpenToCategory(addonName)
-    end)
-    settingsButton:SetScript("OnEnter", function(this)
-        GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:SetText(L["OPEN_SETTINGS"], 1, 1, 1, 0.8)
-        GameTooltip:Show()
-    end)
-    settingsButton:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-
-    self:CreateProfessionButtons(vButtonsFrame, settingsButton)
-
     hButtonsFrame = CreateFrame("Frame", "TradeAnnouncerHButtonsFrame", mainFrame)
-    hButtonsFrame:SetPoint("TOPLEFT", vButtonsFrame, "BOTTOMLEFT")
+    hButtonsFrame:SetPoint("TOPLEFT", mainFrameInset, "BOTTOMLEFT")
     hButtonsFrame:SetPoint("BOTTOMLEFT", mainFrame, 0, 5)
     hButtonsFrame:SetPoint("BOTTOMRIGHT", mainFrame, 0, 5)
 
@@ -199,14 +164,19 @@ function addonTable:CreateButtonsFrame()
     testButton:SetSize(settings.defaultButtons.size.width, settings.defaultButtons.size.height)
     testButton:SetPoint("RIGHT", hButtonsFrame, -5, 0)
     testButton:SetPoint("CENTER", hButtonsFrame)
+
     testButton:SetScript("OnClick", function()
         print(L["YOUR_MESSAGE"] .. editBox:GetText())
     end)
+
     testButton:SetScript("OnEnter", function(this)
-        GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:SetText(L["SHOW_YOUR_MESSAGE"], 1, 1, 1, 0.8)
-        GameTooltip:Show()
+        if not aceAddon.db.profile.hide_tooltips then
+            GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
+            GameTooltip:SetText(L["SHOW_YOUR_MESSAGE"], 1, 1, 1, 1)
+            GameTooltip:Show()
+        end
     end)
+
     testButton:SetScript("OnLeave", function()
         GameTooltip:Hide()
     end)
@@ -215,14 +185,19 @@ function addonTable:CreateButtonsFrame()
     advertiseButton:SetText(tostring(L["ADVERTISE_BUTTON"]))
     advertiseButton:SetSize(settings.defaultButtons.size.width + 35, settings.defaultButtons.size.height)
     advertiseButton:SetPoint("TOPRIGHT", testButton, "TOPLEFT", -5, 0)
+
     advertiseButton:SetScript("OnEnter", function(this)
-        GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:SetText(tostring(L["SEND_YOUR_MESSAGE"]), 1, 1, 1, 0.8)
-        GameTooltip:Show()
+        if not aceAddon.db.profile.hide_tooltips then
+            GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
+            GameTooltip:SetText(tostring(L["SEND_YOUR_MESSAGE"]), 1, 1, 1, 1)
+            GameTooltip:Show()
+        end
     end)
+
     advertiseButton:SetScript("OnLeave", function()
         GameTooltip:Hide()
     end)
+
     advertiseButton:SetScript("OnClick", function(this)
         addonTable:SendAutoMessage()
     end)
@@ -232,55 +207,61 @@ function addonTable:CreateButtonsFrame()
     toggleButton:SetText(tostring(toggleText))
     toggleButton:SetSize(settings.defaultButtons.size.width + 25, settings.defaultButtons.size.height)
     toggleButton:SetPoint("TOPRIGHT", advertiseButton, "TOPLEFT", -5, 0)
+
     toggleButton:SetScript("OnClick", function(this)
         addonTable:ToggleMessage(this)
     end)
+
+    self:CreateProfessionButtons(hButtonsFrame)
 end
 
-function addonTable:CreateProfessionButtons(parentFrame, relativeFrame)
+function addonTable:CreateProfessionButtons(parentFrame)
     local firstProfession, secondProfession = GetProfessions()
+    local number = 1
 
     if firstProfession then
-        local name, icon, _, _, _, _, skillLine = GetProfessionInfo(firstProfession)
-        firstProfessionButton = self:CreateProfessionButton(
+        local name, _, _, _, _, _, skillLine = GetProfessionInfo(firstProfession)
+        firstLinkButton = self:CreateProfessionButton(
             "TradeAnnouncerFirstProfessionButton",
             name,
-            icon,
+            number,
             skillLine,
             parentFrame,
-            relativeFrame
+            nil
         )
+        number = number + 1
     end
     if secondProfession then
-        local name, icon, _, _, _, _, skillLine = GetProfessionInfo(secondProfession)
-        secondProfessionButton = self:CreateProfessionButton(
+        local name, _, _, _, _, _, skillLine = GetProfessionInfo(secondProfession)
+        secondLinkButton = self:CreateProfessionButton(
             "TradeAnnouncerSecondProfessionButton",
             name,
-            icon,
+            number,
             skillLine,
             parentFrame,
-            firstProfessionButton or relativeFrame
+            firstLinkButton
         )
     end
 end
 
----@param buttonName string
----@param name string
----@param icon string
----@param skillLineId number
----@param parentFrame Frame
----@param relativeFrame Button
----@return Button button
-function addonTable:CreateProfessionButton(buttonName, name, icon, skillLineId, parentFrame, relativeFrame)
+--- @param buttonName string
+--- @param name string
+--- @param number number
+--- @param skillLineId number
+--- @param parentFrame Frame
+--- @param relativeFrame Button
+--- @return Button button
+function addonTable:CreateProfessionButton(buttonName, name, number, skillLineId, parentFrame, relativeFrame)
     local button = CreateFrame("Button", buttonName, parentFrame, "UIPanelButtonTemplate")
-    local width = settings.smallButtons.size.width
-    local height = settings.smallButtons.size.height
 
-    button:SetNormalTexture(icon)
-    button:SetPushedTexture(icon)
-    button:SetSize(width, height)
-    button:SetPoint("TOP", relativeFrame, "BOTTOM", 0, -10)
-    button:SetPoint("CENTER", parentFrame)
+    button:SetText("Link #" .. tostring(number))
+    button:SetSize(settings.defaultButtons.size.width + 15, settings.defaultButtons.size.height)
+    if relativeFrame == nil then
+        button:SetPoint("LEFT", parentFrame)
+        button:SetPoint("CENTER", parentFrame)
+    else
+        button:SetPoint("TOPLEFT", relativeFrame, "TOPRIGHT", 5, 0)
+    end
 
     button:SetScript("OnClick", function()
         local professionLink = self:GetLinkForProfession(skillLineId)
@@ -290,11 +271,13 @@ function addonTable:CreateProfessionButton(buttonName, name, icon, skillLineId, 
     end)
 
     button:SetScript("OnEnter", function(this)
-        local localizedMessage = tostring(L["ADD_PROFESSION"])
-        local text = string.gsub(localizedMessage, "#PROFESSION#", name)
-        GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:SetText(text, 1, 1, 1, 0.8)
-        GameTooltip:Show()
+        if not aceAddon.db.profile.hide_tooltips then
+            local localizedMessage = tostring(L["ADD_PROFESSION"])
+            local text = string.gsub(localizedMessage, "#PROFESSION#", name)
+            GameTooltip:SetOwner(this or UIParent, "ANCHOR_BOTTOM")
+            GameTooltip:SetText(text, 1, 1, 1, 1)
+            GameTooltip:Show()
+        end
     end)
 
     button:SetScript("OnLeave", function()
@@ -304,8 +287,8 @@ function addonTable:CreateProfessionButton(buttonName, name, icon, skillLineId, 
     return button
 end
 
----@param skillLineId number?
----@return string? link
+--- @param skillLineId number?
+--- @return string? link
 function addonTable:GetLinkForProfession(skillLineId)
     local link
 
@@ -318,7 +301,7 @@ function addonTable:GetLinkForProfession(skillLineId)
     return link
 end
 
----@return Frame mainFrame, EditBox editBox
+--- @return Frame mainFrame, EditBox editBox
 function addonTable:CreateUI()
     self:CreateMainFrame()
     self:CreateScrollFrame()

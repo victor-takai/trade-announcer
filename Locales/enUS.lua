@@ -17,13 +17,13 @@ L["MESSAGE_TURNED_ON"] = addonNamePrint .. "Your automatic message was turned |c
 L["MESSAGE_TURNED_OFF"] = addonNamePrint .. "Your automatic message was turned |cffbf2626OFF|r"
 L["MESSAGE_WILL_BE_DISPLAYED"] = " and will be displayed in #INTERVAL# seconds"
 
-L["SET_CHAT_CHANNEL_FIRST"] = addonNamePrint .. "|cffff2020Please set the chat/channel in the addon's settings in order to turn on|r"
+L["SET_CHAT_CHANNEL"] = addonNamePrint .. "|cffff2020Set the chat/channel in the addon's settings|r"
 
 L["TEST_BUTTON"] = "Test"
 L["ADVERTISE_BUTTON"] = "Advertise"
 L["YOUR_MESSAGE"] = addonNamePrint .. "Your message: "
 L["SHOW_YOUR_MESSAGE"] = "Print your |cff6699ffmessage|r"
-L["SEND_YOUR_MESSAGE"] = "Send your |cff6699ffmessage|r to the chat"
+L["SEND_YOUR_MESSAGE"] = "Send your |cff6699ffmessage|r in the chat"
 
 L["OPEN_SETTINGS"] = "Open |cff6699ffsettings|r page"
 L["ADD_PROFESSION"] = "Link |cffFFC125[#PROFESSION#]|r to your message"
