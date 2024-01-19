@@ -139,7 +139,7 @@ function UpdateFrameOnUpdate(self, elapsed)
 
 	self.timeSinceLastUpdate = self.timeSinceLastUpdate + elapsed
 	if self.timeSinceLastUpdate >= aceAddon.db.profile.interval then
-        aceAddon:SendMessage()
+        addonTable:SendMessage()
 		self.timeSinceLastUpdate = 0
 	end
 end
