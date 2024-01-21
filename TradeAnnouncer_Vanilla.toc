@@ -1,9 +1,13 @@
 ## Interface: 11500
 ## Title: TradeAnnouncer
-## Version: 1.3
+## Version: 1.4
 ## Author: Kalivos
 ## SavedVariables: TradeAnnouncerDB
 ## RequiredDeps: MessageQueue
+## IconTexture: Interface\AddOns\TradeAnnouncer\Resources\icon.tga
+## AddonCompartmentFunc: TradeAnnouncer_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: TradeAnnouncer_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: TradeAnnouncer_OnAddonCompartmentLeave
 
 embeds.xml
 

@@ -32,6 +32,7 @@ L["CHAT_TYPE"] = "Tipo do chat"
 L["SET_CHAT_TYPE"] = "Selecione o chat"
 L["AUTO_FOCUS"] = "Focar janela automaticamente"
 L["HIDE_TOOLTIPS"] = "Ocultar dicas"
+L["HIDE_MINIMAP_BUTTON"] = "Ocultar botão do minimapa"
 
 L["CHANNEL"] = "Canal"
 L["SAY"] = "Dizer"

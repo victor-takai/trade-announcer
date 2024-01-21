@@ -29,8 +29,9 @@ function addonTable:CreateInterfaceOptions()
     local title = self:CreateTitle(panel)
     local dropDownFrame = self:CreateChatTypeDropdown(panel, title)
     local intervalFrame = self:CreateIntervalSlider(panel, dropDownFrame)
-    local checkBoxFrame = self:CreateAutoFocusCheckBox(panel, intervalFrame)
-    local _ = self:CreateHideTooltipsCheckBox(panel, checkBoxFrame)
+    local autoFocusBoxFrame = self:CreateAutoFocusCheckBox(panel, intervalFrame)
+    local hideTooltipsFrame = self:CreateHideTooltipsCheckBox(panel, autoFocusBoxFrame)
+    self:CreateHideMinimapButtonCheckBox(panel, hideTooltipsFrame)
 
 	InterfaceOptions_AddCategory(panel)
 end
@@ -246,6 +247,36 @@ function addonTable:CreateHideTooltipsCheckBox(parentFrame, referenceFrame)
     local text = frame:CreateFontString("TradeAnnouncerHideTooltipsCheckboxText", "ARTWORK", "GameFontNormalSmall")
     text:SetPoint("LEFT", checkBox, "RIGHT")
 	text:SetText(tostring(L["HIDE_TOOLTIPS"]))
+    text:SetTextColor(1, 1, 1, 1)
+	text:SetJustifyH("LEFT")
+	text:SetWidth(200)
+
+    local width = max(checkBox:GetWidth(), text:GetWidth())
+    local height = checkBox:GetHeight() - 11
+    frame:SetSize(width, height)
+
+    return frame
+end
+
+function addonTable:CreateHideMinimapButtonCheckBox(parentFrame, referenceFrame)
+    local frame = CreateFrame("Frame", "TradeAnnouncerHideMinimapButtonFrame", parentFrame)
+    frame:SetPoint("TOPLEFT", referenceFrame, "BOTTOMLEFT", 0, -16)
+
+    -- frame.Bg = frame:CreateTexture(nil, "BACKGROUND")
+    -- frame.Bg:SetAllPoints(frame)
+    -- frame.Bg:SetColorTexture(0.2, 0.6, 0, 0.5)
+
+    local checkBox = CreateFrame("CheckButton", "TradeAnnouncerHideMinimapButtonCheckBox", frame, "UICheckButtonTemplate")
+    checkBox:SetPoint("TOPLEFT", frame, -5, 5)
+    checkBox:SetChecked(aceAddon.db.profile.hide_tooltips)
+    checkBox:SetScript("OnClick", function()
+        aceAddon.db.profile.hide_minimap_button = not aceAddon.db.profile.hide_minimap_button
+        addonTable:ToggleMinimapButton()
+    end)
+
+    local text = frame:CreateFontString("TradeAnnouncerHideMinimapButtonCheckboxText", "ARTWORK", "GameFontNormalSmall")
+    text:SetPoint("LEFT", checkBox, "RIGHT")
+	text:SetText(tostring(L["HIDE_MINIMAP_BUTTON"]))
     text:SetTextColor(1, 1, 1, 1)
 	text:SetJustifyH("LEFT")
 	text:SetWidth(200)

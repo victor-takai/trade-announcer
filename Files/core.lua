@@ -10,6 +10,9 @@ addonTable.aceAddon = aceAddon
 --- AceLocale local variable
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
+--- Icon local variable
+local icon = LibStub("LibDBIcon-1.0")
+
 --- Local variables
 local mainFrame
 local editBox
@@ -36,10 +39,31 @@ local defaults = {
         channel_type = nil, -- Default channel
         auto_focus_enabled = false, -- Default auto focus
         hide_tooltips = false, -- Default hide tooltips
+        hide_minimap_button = false, -- Default hide minimap button
     },
 }
 
 ----------------------------------------------------------------------------------------
+
+function TradeAnnouncer_OnAddonCompartmentClick(_, buttonName, _)
+    if buttonName == "RightButton" then
+        InterfaceOptionsFrame_OpenToCategory(addonName)
+    elseif buttonName == "LeftButton" then
+        addonTable:ToggleUI()
+    end
+end
+
+function TradeAnnouncer_OnAddonCompartmentEnter(_, menuButtonFrame)
+    GameTooltip:SetOwner(menuButtonFrame, "ANCHOR_BOTTOM")
+    GameTooltip:AddLine(addonName)
+    GameTooltip:AddLine(L["MINIMAP_LEFT_CLICK"], 1, 1, 1)
+    GameTooltip:AddLine(L["MINIMAP_RIGHT_CLICK"], 1, 1, 1)
+    GameTooltip:Show()
+end
+
+function TradeAnnouncer_OnAddonCompartmentLeave()
+    GameTooltip:Hide()
+end
 
 function aceAddon:OnInitialize()
     --- Setup AceDB
@@ -180,8 +204,12 @@ function addonTable:CreateMinimapButton()
         end,
     })
 
-    local icon = LibStub("LibDBIcon-1.0")
     icon:Register(addonName, tradeAnnouncerLDB, aceAddon.db.profile.minimap)
+    if aceAddon.db.profile.hide_minimap_button then
+        icon:Hide(addonName)
+    else
+        icon:Show(addonName)
+    end
 end
 
 --- Sends the message
@@ -225,6 +253,15 @@ end
 --- Inserts profession link in the message 
 function addonTable:LinkProfession(professionLink)
     editBox:Insert(professionLink)
+end
+
+--- Toggles the minimap button
+function addonTable:ToggleMinimapButton()
+    if aceAddon.db.profile.hide_minimap_button then
+        icon:Hide(addonName)
+    else
+        icon:Show(addonName)
+    end
 end
 
 --- Toggles the UI
