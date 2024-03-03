@@ -270,7 +270,7 @@ function addonTable:CreateHideMinimapButtonCheckBox(parentFrame, referenceFrame)
     checkBox:SetPoint("TOPLEFT", frame, -5, 5)
     checkBox:SetChecked(aceAddon.db.profile.hide_tooltips)
     checkBox:SetScript("OnClick", function()
-        aceAddon.db.profile.hide_minimap_button = not aceAddon.db.profile.hide_minimap_button
+        aceAddon.db.profile.hide_minimap_button = checkBox:GetChecked()
         addonTable:ToggleMinimapButton()
     end)
 
