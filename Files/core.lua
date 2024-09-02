@@ -47,7 +47,7 @@ local defaults = {
 
 function TradeAnnouncer_OnAddonCompartmentClick(_, buttonName, _)
     if buttonName == "RightButton" then
-        InterfaceOptionsFrame_OpenToCategory(addonName)
+        Settings.OpenToCategory(addonName)
     elseif buttonName == "LeftButton" then
         addonTable:ToggleUI()
     end
@@ -194,7 +194,7 @@ function addonTable:CreateMinimapButton()
             if button == "LeftButton" then
                 self:ToggleUI()
             elseif button == "RightButton" then
-                InterfaceOptionsFrame_OpenToCategory(addonName)
+                Settings.OpenToCategory(addonName)
             end
         end,
         OnTooltipShow = function(tooltip)

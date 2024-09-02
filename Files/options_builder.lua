@@ -33,7 +33,13 @@ function addonTable:CreateInterfaceOptions()
     local hideTooltipsFrame = self:CreateHideTooltipsCheckBox(panel, autoFocusBoxFrame)
     self:CreateHideMinimapButtonCheckBox(panel, hideTooltipsFrame)
 
-	InterfaceOptions_AddCategory(panel)
+    if InterfaceOptions_AddCategory then
+	    InterfaceOptions_AddCategory(panel)
+    else
+        local category, layout = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
+        category.ID = panel.name
+        Settings.RegisterAddOnCategory(category)
+    end
 end
 
 function addonTable:CreateTitle(panel)
